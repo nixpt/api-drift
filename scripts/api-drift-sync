@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Repo-local front door to jokersquad's agent-sync. Same protocol as bro-cli/docs/SYNC.md.
+# Repo-local front door to the nixpt fleet agent-sync channel (fleet tooling only; not part of the crate, excluded from the package). Same protocol as bro-cli/docs/SYNC.md.
 set -euo pipefail
 
 die() { printf 'api-drift-sync: %s\n' "$*" >&2; exit 1; }

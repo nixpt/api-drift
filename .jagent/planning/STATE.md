@@ -23,8 +23,7 @@ _None — APIDRIFT-5 landed and pushed. Next: APIDRIFT-6._
 
 ## Blockers
 
-- `/build` 100% full — builds run on `/tmp/api-drift-target`; real arniko
-  rustdoc snapshots wait on disk budget.
+_None._
 
 ## Metrics
 
