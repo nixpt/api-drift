@@ -32,4 +32,4 @@ here — the existing producer is the starting point, not a duplicate.
 
 ## Notes
 
-Depends on APIDRIFT-6. Nightly toolchain at `/build/rustup`.
+Depends on APIDRIFT-6. Requires a nightly toolchain for rustdoc JSON.

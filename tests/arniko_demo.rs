@@ -19,8 +19,10 @@ fn doc(items: &[(&str, &str, serde_json::Value)]) -> String {
     let mut paths = serde_json::Map::new();
     for (id, path, node) in items {
         index.insert((*id).to_owned(), node.clone());
-        let segs: Vec<serde_json::Value> =
-            path.split("::").map(|s| serde_json::Value::String(s.to_owned())).collect();
+        let segs: Vec<serde_json::Value> = path
+            .split("::")
+            .map(|s| serde_json::Value::String(s.to_owned()))
+            .collect();
         paths.insert(
             (*id).to_owned(),
             serde_json::json!({"crate_id": 0, "path": segs}),
@@ -31,8 +33,16 @@ fn doc(items: &[(&str, &str, serde_json::Value)]) -> String {
 
 fn v98() -> String {
     doc(&[
-        ("1", "arniko::Alert::new", fn_node("pub fn new(message: &str) -> Self")),
-        ("2", "arniko::badge", fn_node("pub fn badge(text: &str) -> String")),
+        (
+            "1",
+            "arniko::Alert::new",
+            fn_node("pub fn new(message: &str) -> Self"),
+        ),
+        (
+            "2",
+            "arniko::badge",
+            fn_node("pub fn badge(text: &str) -> String"),
+        ),
         ("3", "arniko::legacy", fn_node("pub fn legacy()")),
     ])
 }
@@ -44,8 +54,16 @@ fn v99() -> String {
             "arniko::Alert::new",
             fn_node("pub fn new(message: impl Into<String>) -> Self"),
         ),
-        ("2", "arniko::tag", fn_node("pub fn tag(text: &str) -> String")),
-        ("4", "arniko::Sparkline::render", fn_node("pub fn render(&self) -> String")),
+        (
+            "2",
+            "arniko::tag",
+            fn_node("pub fn tag(text: &str) -> String"),
+        ),
+        (
+            "4",
+            "arniko::Sparkline::render",
+            fn_node("pub fn render(&self) -> String"),
+        ),
     ])
 }
 

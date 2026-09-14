@@ -59,7 +59,10 @@ impl fmt::Display for SnapshotFileError {
                 write!(f, "snapshot format: expected `{exp}`, found `{got}`")
             }
             Self::HashMismatch(exp, got) => {
-                write!(f, "snapshot content hash mismatch: expected `{exp}`, found `{got}`")
+                write!(
+                    f,
+                    "snapshot content hash mismatch: expected `{exp}`, found `{got}`"
+                )
             }
         }
     }

@@ -5,6 +5,14 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "API drift handler: snapshot crate surfaces, diff versions, classify breaks, suggest downstream patches"
 repository = "https://github.com/nixpt/api-drift"
+readme = "README.md"
+keywords = ["api", "semver", "breaking-changes", "rustdoc", "codemod"]
+categories = ["development-tools"]
+# `[lints]` needs cargo 1.74; serde_json declares 1.71; `is_some_and` needs 1.70.
+rust-version = "1.74"
+# Ship the crate, not the fleet: planning board, agent memory, dev scripts and
+# design notes stay in git but out of the crates.io package.
+exclude = [".jagent/", ".dejavue/", ".cargo/", "scripts/", "docs/", "CLAUDE.md", "STATE.md", ".gitattributes"]
 
 [features]
 default = []

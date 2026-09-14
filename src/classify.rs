@@ -97,7 +97,12 @@ fn classify_added(item: &Item) -> ClassifiedBreak {
         note: if item.attrs.is_empty() {
             format!("added {:?} {}", item.kind, item.path)
         } else {
-            format!("added {:?} {} [{}]", item.kind, item.path, item.attrs.join(", "))
+            format!(
+                "added {:?} {} [{}]",
+                item.kind,
+                item.path,
+                item.attrs.join(", ")
+            )
         },
     }
 }
@@ -210,7 +215,11 @@ mod tests {
     fn sig_change_breaking_unless_widening() {
         // New required arg: Breaking (the reported bug — was Warning).
         let d = crate::diff::diff_snapshots(
-            &snap(vec![Item::new("a::f", ItemKind::Function, "pub fn f(x: u8)")]),
+            &snap(vec![Item::new(
+                "a::f",
+                ItemKind::Function,
+                "pub fn f(x: u8)",
+            )]),
             &snap(vec![Item::new(
                 "a::f",
                 ItemKind::Function,
@@ -266,9 +275,7 @@ mod tests {
             ]),
         );
         let out = classify_diff(&d);
-        let sev = |p: &str| {
-            out.iter().find(|b| b.path == p).unwrap().severity
-        };
+        let sev = |p: &str| out.iter().find(|b| b.path == p).unwrap().severity;
         // The bro-desktop case: new BackendEvent variants must warn, not pass
         // as Compatible.
         assert_eq!(sev("e::E::V"), Severity::Warning);
@@ -290,4 +297,3 @@ mod tests {
         assert_eq!(out[1].path, "z::f");
     }
 }
-

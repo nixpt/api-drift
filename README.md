@@ -1,108 +1,166 @@
 # api-drift
 
-API drift handler: snapshot a crate's public surface, diff versions, classify
-breaks, suggest downstream patches.
+Snapshot a Rust crate's public surface, diff two versions, classify each
+change by how badly it breaks a downstream, and suggest the mechanical edit
+that fixes it.
 
-**Motivation:** `arniko` is consumed by many sibling repos. When an upstream
-API changes (rename, new required arg, removed item), downstream crates break
-and someone hand-edits every call site. `api-drift` is the policy/type layer
-for that workflow — the mechanical part (what changed, how bad, what edit
-fixes it) so agents/humans stop rediscovering it per repo.
+When a shared crate moves an API (rename, new required argument, removed
+item), every consumer breaks and someone hand-edits every call site.
+api-drift is the policy and type layer for that loop: **what changed, how bad
+is it, what edit fixes it**, as data a script, an agent, or a person can act
+on.
+
+- Core is pure std with zero dependencies and no I/O.
+- Opt-in `producer` feature reads rustdoc JSON into a snapshot.
+- Opt-in `serde` feature serializes everything and defines a committed
+  snapshot file format with a verified content hash.
+- Conservative by design: signature changes are Breaking unless proven
+  source-compatible, and only edits a script could apply without judgment are
+  marked auto-appliable.
+
+Status: 0.1.0, early. The API may still move between minor versions.
+
+## Quick start
+
+```toml
+[dependencies]
+api-drift = "0.1"
+```
+
+```rust
+use api_drift::{
+    snapshot::{ApiSnapshot, Item, ItemKind},
+    diff::diff_snapshots,
+    classify::classify_diff,
+    suggest::suggest_for_breaks,
+};
+
+let old = ApiSnapshot::new("widgets 0.2.98", vec![
+    Item::new("widgets::Alert::new", ItemKind::Function, "pub fn new(message: &str) -> Self"),
+    Item::new("widgets::badge", ItemKind::Function, "pub fn badge(label: &str) -> Badge"),
+]);
+let new = ApiSnapshot::new("widgets 0.2.99", vec![
+    Item::new("widgets::Alert::new", ItemKind::Function, "pub fn new(message: impl Into<String>) -> Self"),
+    Item::new("widgets::tag", ItemKind::Function, "pub fn tag(label: &str) -> Badge"),
+]);
+
+let diff = diff_snapshots(&old, &new);   // added / removed / changed, sorted by path
+let breaks = classify_diff(&diff);       // + BreakKind, Severity, item kind
+let fixes = suggest_for_breaks(&breaks); // structured SuggestionAction per break
+
+for s in &fixes {
+    println!("{} {:?} auto={}", s.path, s.action, s.auto_appliable);
+}
+// widgets::Alert::new  ReviewSignature { old, new }     auto=false  (Compatible: widening)
+// widgets::tag         RenameCall { from: widgets::badge, to: widgets::tag }  auto=true
+```
 
 ## Pipeline
 
 ```text
 producer ──▶ ApiSnapshot ──▶ diff ──▶ classify ──▶ suggest ──▶ consumer
-(rustdoc JSON,   versioned     ApiDiff   ClassifiedBreak  Suggestion   (codemod,
- `cargo            inventory                                     rename/add-arg/  agent,
- public-api`,                                                 review-*)  human)
- tree-sitter…)
+rustdoc JSON    versioned      ApiDiff   ClassifiedBreak  Suggestion   codemod / agent / human
+(feature        inventory      added     BreakKind        SuggestionAction
+ `producer`)                   removed   Severity         auto_appliable
+                               changed   item kind
 ```
 
-The snapshot/diff/classify/suggest core is I/O-free (pure std, zero deps).
-The rustdoc-JSON producer lives behind the `producer` feature (`serde_json`).
+### Severity rules
 
-## API
+| Change | Severity | Why |
+|---|---|---|
+| item added | Compatible | nothing downstream references it yet |
+| enum variant or struct field added | Warning | exhaustive matches and struct literals break; Compatible if the parent is `non_exhaustive` or the item is `deprecated` |
+| item removed | Breaking | references stop resolving |
+| function or method signature changed | Breaking | Rust has no default arguments; Compatible only when the change matches the widening allowlist (`&str` → `impl Into<String>`, `&T` → `impl AsRef<T>`, …) |
+| other kinds, signature changed | Warning | shape moved, may still compile |
+| item kind changed (struct → enum, …) | Breaking | usage must be reworked |
 
-```rust,ignore
-use api_drift::{
-    snapshot::{ApiSnapshot, Item, ItemKind},
-    diff::diff_snapshots, classify::classify_diff, suggest::suggest_for_breaks,
-};
+### Suggestions
 
-let old = ApiSnapshot::new("arniko 0.2.98", vec![
-    Item::new("arniko::Alert::new", ItemKind::Function, "pub fn new(message: &str) -> Self"),
-]);
-let new = ApiSnapshot::new("arniko 0.2.99", vec![
-    Item::new("arniko::Alert::new", ItemKind::Function, "pub fn new(message: impl Into<String>) -> Self"),
-]);
-
-let diff = diff_snapshots(&old, &new);      // added / removed / changed
-let breaks = classify_diff(&diff);          // + BreakKind + Severity
-let fixes = suggest_for_breaks(&breaks);    // rename-call / review-signature / …
-```
-
-Rename detection: a `Removed` + an `Added` under the same parent module
-collapse into one auto-appliable `rename-call` suggestion.
+| `SuggestionAction` | When | Auto-appliable |
+|---|---|---|
+| `RenameCall { from, to }` | removed + added under the same parent, same kind, identical signature modulo the leaf name | yes |
+| `ReviewRename { from, to }` | same, but only a name-similarity signal | no |
+| `AddMatchArm { enum_path, variant }` | new enum variant | no |
+| `ReviewField { field }` | new struct field | no |
+| `ReviewSignature { old, new }` | same path, new signature | no |
+| `ReviewKind` | same path, new item kind | no |
+| `RemoveItem` | item removed with no rename candidate | no |
+| `NoOp` | pure addition | yes |
 
 ## Producer (`producer` feature)
 
-```bash
+```sh
 cargo +nightly rustdoc -- -Z unstable-options --output-format json
 ```
 
 ```rust,ignore
 let snap = api_drift::producer::snapshot_from_rustdoc_json(
-    std::path::Path::new("target/doc/arniko.json"), "arniko 0.2.99",
+    std::path::Path::new("target/doc/widgets.json"),
+    "widgets 0.2.99",
 )?;
 ```
 
-Validated against real rustdoc JSON (format v61, nightly-1.100) on this very
-crate: `cargo +nightly rustdoc -- -Z unstable-options --output-format json`
-then parse — 55 public items round-tripped through the producer in the probe
-(not a committed test; rustdoc format drifts per toolchain). Committed:
-`tests/arniko_demo.rs` — synthetic arniko 0.2.98→0.2.99 rustdoc docs through
-the full pipeline (widened `Alert::new`, `badge`→`tag` rename, removed
-`legacy`, added `Sparkline::render`):
+Only in-crate public items become `Item`s; the signature string is the
+compact `inner` JSON of the rustdoc node, so any semantic move changes it.
+Unknown node shapes are skipped rather than failing, so a newer rustdoc format
+degrades to fewer items. Built against rustdoc JSON format v61.
+`tests/arniko_demo.rs` runs a synthetic 0.2.98 → 0.2.99 change through the
+full pipeline.
 
-```text
-[Warning/SignatureChanged] arniko::Alert::new
-[Compatible/Added] arniko::Sparkline::render
-[Breaking/Removed] arniko::badge → suggest rename-call (auto)
-[Breaking/Removed] arniko::legacy → suggest remove-item (review)
+## Snapshot files (`serde` feature)
+
+```json
+{
+  "format": "api-drift/snapshot/v1",
+  "surface": "rust-public",
+  "version": "widgets 0.2.99",
+  "items": [{ "path": "widgets::Alert::new", "kind": "Function", "sig": "…", "attrs": [] }],
+  "content_hash": "sha256:…"
+}
 ```
 
-## Layout
+`render_snapshot_file` sorts items by path and computes the hash;
+`parse_snapshot_file` rejects an unknown `format` or a hash mismatch. This is
+the committed contract the embedded ledger builds on.
 
-```text
-api-drift/
-├── Cargo.toml            crate api-drift (core zero-dep; producer feature)
-├── src/
-│   ├── lib.rs            pipeline docs + re-exports
-│   ├── snapshot.rs       ApiSnapshot / Item / ItemKind
-│   ├── diff.rs           ApiDiff / diff_snapshots
-│   ├── classify.rs       BreakKind / Severity / classify_diff
-│   ├── suggest.rs        Suggestion / suggest_for_breaks (+rename detect)
-│   └── producer.rs       rustdoc-JSON → ApiSnapshot (`producer` feature)
-├── tests/arniko_demo.rs  end-to-end demo (requires `producer` feature)
-├── .jagent/              planning board (APIDRIFT-NN tickets)
-└── STATE.md              delivery snapshot
+## Features
+
+| Feature | Adds | Dependencies |
+|---|---|---|
+| (default) | snapshot / diff / classify / suggest | none |
+| `producer` | rustdoc JSON → `ApiSnapshot` | `serde_json` (implies `serde`) |
+| `serde` | derives on all public types, snapshot file format v1 | `serde`, `serde_json`, `sha2`, `hex` |
+
+Minimum supported Rust version: 1.74.
+
+## Where this is going
+
+`docs/DESIGN-embedded-ledger.md` describes the next shape: any Rust project
+embeds api-drift as a dev-dependency test that keeps a committed snapshot and
+an append-only ledger of classified changes with migration notes, covering
+surfaces beyond `pub` items (protocol methods, enum variants, CLI flags), so a
+downstream can pin an upstream surface and learn, at its own call sites, what
+broke and what to edit. Tickets `APIDRIFT-6` onward on the planning board
+(`.jagent/planning/`) track it.
+
+## Build and test
+
+```sh
+cargo test
+cargo test --all-features
+cargo clippy --all-targets --all-features -- -D warnings
 ```
 
-## Build / test
-
-```bash
-source scripts/rust-dev.sh   # per-agent CARGO_TARGET_DIR (+ sccache)
-cargo test                             # core: 15 tests + 1 doctest
-cargo test --features producer         # + 4 producer tests + demo test
-cargo clippy --all-targets -- -D warnings
-```
-
-## Status
-
-M0 scaffold + M1 producer (APIDRIFT-1/2 done). See `STATE.md` and
-`.jagent/planning/` for the roadmap (CLI, downstream appliers).
+See `CONTRIBUTING.md` for the full gate CI runs, the layout, and the
+invariants tests protect.
 
 ## License
 
-MIT OR Apache-2.0
+Licensed under either of
+
+- Apache License, Version 2.0 (`LICENSE-APACHE`)
+- MIT license (`LICENSE-MIT`)
+
+at your option.

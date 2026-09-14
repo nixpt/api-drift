@@ -4,7 +4,7 @@
 Core pure std, zero deps; `producer` feature adds serde_json. I/O only in the producer.
 Design direction: embedded contract ledger (`docs/DESIGN-embedded-ledger.md`, proposed).
 
-**Status (2026-09-14):** M0 + M1 complete incl. APIDRIFT-4 review hardening; M2 ticketed (5→6→8+9→7→10→11).
+**Status (2026-09-14):** M0 + M1 complete incl. APIDRIFT-4/5; release pass done (LICENSE-MIT/APACHE, CHANGELOG, CONTRIBUTING, ci.yml, crates.io metadata + exclude, MSRV 1.74). `api-drift` name is free on crates.io; publish 0.1.0 after CI is green. M2 embedded-ledger track next (6→8+9→7→10→11).
 
 **License:** MIT OR Apache-2.0.
 

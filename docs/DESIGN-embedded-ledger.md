@@ -71,7 +71,7 @@ Three properties, in priority order:
 | core | `api-drift` (exists) | std | snapshot / diff / classify / suggest. Stays pure. |
 | serialization | feature `serde` | serde, serde_json | `ApiSnapshot`, `ClassifiedBreak`, `Suggestion` derive; snapshot file format v1 |
 | surfaces | feature `surface` | core | `trait Surface { fn name(&self) -> &str; fn snapshot(&self) -> ApiSnapshot; }` plus built-ins below |
-| `rust-public` surface | feature `rust-public` | rustdoc JSON (nightly) now, `syn` on stable later | nightly is on the box (`/build/rustup`), so start there |
+| `rust-public` surface | feature `rust-public` | rustdoc JSON (nightly) now, `syn` on stable later | a nightly toolchain is required for rustdoc JSON today |
 | `protocol` surface | feature `protocol` | schemars (optional) | items are ACP/MCP methods with request/response schema hashes as `sig`; `_bro/*` extensions first |
 | `cli` surface | feature `cli` | clap introspection | subcommands and flags as items; `bro` gains this for free when BRO-112 moves the bin |
 | `enum` surface | feature `surface` | none | derive-free: a macro lists variants of a public enum as `Variant` items (the `BackendEvent` case) |

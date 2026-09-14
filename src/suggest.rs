@@ -110,9 +110,7 @@ pub fn suggest_for_breaks(breaks: &[ClassifiedBreak]) -> Vec<Suggestion> {
         if renames.iter().any(|(from, _, _)| from == &b.path) {
             continue; // folded into the rename target's suggestion
         }
-        if let Some((from, to, confident)) =
-            renames.iter().find(|(_, to, _)| to == &b.path)
-        {
+        if let Some((from, to, confident)) = renames.iter().find(|(_, to, _)| to == &b.path) {
             if *confident {
                 let detail = format!("rename {from} -> {to} at call sites");
                 out.push(Suggestion {
@@ -144,9 +142,7 @@ fn rename_review_for(b: &ClassifiedBreak, from: &str, to: &str) -> Suggestion {
             from: from.to_owned(),
             to: to.to_owned(),
         },
-        detail: format!(
-            "possible rename {from} -> {to}; verify sigs then rename call sites"
-        ),
+        detail: format!("possible rename {from} -> {to}; verify sigs then rename call sites"),
         auto_appliable: false,
     }
 }
@@ -254,7 +250,12 @@ fn detect_renames(breaks: &[ClassifiedBreak]) -> Vec<(String, String, bool)> {
         let old_sig = r.old_sig.as_deref().unwrap_or("");
         // Confident first: sig equal modulo the renamed leaf segment.
         let confident = cands.iter().find(|a| {
-            sigs_match_modulo_rename(old_sig, a.new_sig.as_deref().unwrap_or(""), &r.path, &a.path)
+            sigs_match_modulo_rename(
+                old_sig,
+                a.new_sig.as_deref().unwrap_or(""),
+                &r.path,
+                &a.path,
+            )
         });
         if let Some(a) = confident {
             pairs.push((r.path.clone(), a.path.clone(), true));
@@ -263,9 +264,7 @@ fn detect_renames(breaks: &[ClassifiedBreak]) -> Vec<(String, String, bool)> {
         // Weak signal: small sig edit distance → review, not auto.
         if let Some(a) = cands
             .iter()
-            .filter(|a| {
-                edit_distance(old_sig, a.new_sig.as_deref().unwrap_or("")) <= 8
-            })
+            .filter(|a| edit_distance(old_sig, a.new_sig.as_deref().unwrap_or("")) <= 8)
             .min_by(|a, b| a.path.cmp(&b.path))
         {
             pairs.push((r.path.clone(), a.path.clone(), false));
@@ -416,7 +415,9 @@ mod tests {
         ];
         let out = suggest_for_breaks(&breaks);
         assert_eq!(out.len(), 2);
-        assert!(out.iter().all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
+        assert!(out
+            .iter()
+            .all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
     }
 
     #[test]
@@ -441,9 +442,14 @@ mod tests {
         ];
         let out = suggest_for_breaks(&breaks);
         assert_eq!(out.len(), 2);
-        assert!(out.iter().all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
+        assert!(out
+            .iter()
+            .all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
         // The Field removal needs review; the lone added Method stays no-op.
-        let rm = out.iter().find(|s| matches!(s.action, SuggestionAction::RemoveItem)).unwrap();
+        let rm = out
+            .iter()
+            .find(|s| matches!(s.action, SuggestionAction::RemoveItem))
+            .unwrap();
         assert!(!rm.auto_appliable);
     }
 
@@ -479,7 +485,9 @@ mod tests {
             assert_eq!(folded.len(), 1);
             assert!(!folded[0].auto_appliable);
         }
-        assert!(out.iter().all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
+        assert!(out
+            .iter()
+            .all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
     }
 
     #[test]
@@ -489,18 +497,20 @@ mod tests {
             BreakKind::Added,
             ItemKind::Variant,
         )]);
-        assert!(matches!(out[0].action, SuggestionAction::AddMatchArm { .. }));
+        assert!(matches!(
+            out[0].action,
+            SuggestionAction::AddMatchArm { .. }
+        ));
         assert!(!out[0].auto_appliable);
     }
 
     #[test]
     fn added_field_suggests_review() {
-        let out = suggest_for_breaks(&[brk(
-            "bro::Opts::extra",
-            BreakKind::Added,
-            ItemKind::Field,
-        )]);
-        assert!(matches!(out[0].action, SuggestionAction::ReviewField { .. }));
+        let out = suggest_for_breaks(&[brk("bro::Opts::extra", BreakKind::Added, ItemKind::Field)]);
+        assert!(matches!(
+            out[0].action,
+            SuggestionAction::ReviewField { .. }
+        ));
         assert!(!out[0].auto_appliable);
     }
 
@@ -610,4 +620,3 @@ mod tests {
         assert!(!it.has_attr("non_exhaustive"));
     }
 }
-

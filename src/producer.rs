@@ -1,4 +1,4 @@
-//! rustdoc-JSON → [`ApiSnapshot`](crate::snapshot::ApiSnapshot) producer.
+//! rustdoc-JSON → [`ApiSnapshot`] producer.
 //!
 //! Requires the `producer` cargo feature (`serde_json`). Input is a rustdoc
 //! JSON file as emitted by:
@@ -8,7 +8,7 @@
 //! ```
 //!
 //! Only in-crate (`crate_id == 0`) public items listed in the `paths` table
-//! become [`Item`](crate::snapshot::Item)s. Signature strings are the raw
+//! become [`Item`]s. Signature strings are the raw
 //! `inner` JSON payload (compact form), so any semantic move flips the sig.
 //!
 //! # Limitations (documented, not silent)
@@ -70,10 +70,7 @@ pub fn snapshot_from_rustdoc_json(
 }
 
 /// Same as [`snapshot_from_rustdoc_json`] but from an in-memory document.
-pub fn snapshot_from_rustdoc_str(
-    doc: &str,
-    version: &str,
-) -> Result<ApiSnapshot, ProducerError> {
+pub fn snapshot_from_rustdoc_str(doc: &str, version: &str) -> Result<ApiSnapshot, ProducerError> {
     let root: Value = serde_json::from_str(doc)?;
     parse_doc(&root, version)
 }
@@ -274,9 +271,8 @@ mod tests {
 
     #[test]
     fn missing_file_errors() {
-        let err =
-            snapshot_from_rustdoc_json(std::path::Path::new("/nonexistent/x.json"), "v")
-                .unwrap_err();
+        let err = snapshot_from_rustdoc_json(std::path::Path::new("/nonexistent/x.json"), "v")
+            .unwrap_err();
         assert!(matches!(err, ProducerError::Io(_)));
     }
 
@@ -301,10 +297,7 @@ mod tests {
         assert!(s.get("demo::a").unwrap().has_attr("deprecated"));
         assert!(s.get("demo::T").unwrap().has_attr("non_exhaustive"));
         // And they move severity: deprecated removal still breaks but says so.
-        let d = crate::diff::diff_snapshots(
-            &s,
-            &crate::snapshot::ApiSnapshot::new("v2", vec![]),
-        );
+        let d = crate::diff::diff_snapshots(&s, &crate::snapshot::ApiSnapshot::new("v2", vec![]));
         let breaks = crate::classify::classify_diff(&d);
         assert!(breaks.iter().any(|b| b.note.contains("deprecated")));
     }
