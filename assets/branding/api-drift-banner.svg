@@ -1,0 +1,302 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="banner-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b101d"/>
+      <stop offset="60%" stop-color="#070a12"/>
+      <stop offset="100%" stop-color="#030509"/>
+    </linearGradient>
+
+    <!-- Chrome Bar Border Gradient -->
+    <linearGradient id="banner-border" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Title Gradient -->
+    <linearGradient id="title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="60%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <!-- Emblem Gradients -->
+    <linearGradient id="emblem-v1-grad" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="emblem-drift-grad" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+
+    <linearGradient id="emblem-delta-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+
+    <!-- Radial Ambient Glows -->
+    <radialGradient id="left-glow" cx="20%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#0b101d" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#070a12" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Glow Filters -->
+    <filter id="b-cyan-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="b-drift-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="b-core-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Banner Outer Shell -->
+  <rect x="2" y="2" width="1196" height="416" rx="20" fill="url(#banner-bg)" stroke="url(#banner-border)" stroke-width="2"/>
+
+  <!-- Subtle Blueprint Tech Grid on Canvas -->
+  <g opacity="0.05" stroke="#38bdf8" stroke-width="1">
+    <line x1="40" y1="90" x2="1160" y2="90"/>
+    <line x1="40" y1="150" x2="1160" y2="150"/>
+    <line x1="40" y1="210" x2="1160" y2="210"/>
+    <line x1="40" y1="270" x2="1160" y2="270"/>
+    <line x1="40" y1="330" x2="1160" y2="330"/>
+    <line x1="40" y1="390" x2="1160" y2="390"/>
+    <line x1="120" y1="50" x2="120" y2="410"/>
+    <line x1="260" y1="50" x2="260" y2="410"/>
+    <line x1="400" y1="50" x2="400" y2="410"/>
+    <line x1="650" y1="50" x2="650" y2="410"/>
+    <line x1="900" y1="50" x2="900" y2="410"/>
+    <line x1="1100" y1="50" x2="1100" y2="410"/>
+  </g>
+
+  <!-- Ambient Light Backdrop -->
+  <circle cx="210" cy="240" r="220" fill="url(#left-glow)"/>
+
+  <!-- Top Chrome Navigation / Header Bar -->
+  <g>
+    <!-- Header baseline bar -->
+    <rect x="2" y="2" width="1196" height="42" rx="20" fill="#080d1a" fill-opacity="0.8"/>
+    <!-- Overwrite bottom corner roundings for top bar -->
+    <rect x="2" y="24" width="1196" height="20" fill="#080d1a" fill-opacity="0.8"/>
+    <line x1="2" y1="44" x2="1198" y2="44" stroke="#1e293b" stroke-width="1.5"/>
+
+    <!-- Window Dots -->
+    <circle cx="28" cy="23" r="5.5" fill="#f43f5e" opacity="0.85"/>
+    <circle cx="48" cy="23" r="5.5" fill="#f59e0b" opacity="0.85"/>
+    <circle cx="68" cy="23" r="5.5" fill="#10b981" opacity="0.85"/>
+
+    <!-- Path / Title inside Chrome -->
+    <text x="96" y="27" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="600" fill="#64748b">
+      github.com/nixpt/api-drift <tspan fill="#334155">/</tspan> <tspan fill="#94a3b8">crates.io/crates/api-drift</tspan>
+    </text>
+
+    <!-- Right Header Status Pill -->
+    <g transform="translate(940, 11)">
+      <rect x="0" y="0" width="232" height="24" rx="12" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+      <circle cx="14" cy="12" r="4" fill="#10b981"/>
+      <text x="26" y="16" font-family="'JetBrainsMono NF', monospace" font-size="11" font-weight="700" fill="#34d399">MSRV 1.74 · ZERO-DEP CORE</text>
+    </g>
+  </g>
+
+  <!-- Left Side: Hero Emblem -->
+  <g transform="translate(68, 92) scale(1.05)">
+    <!-- Drift displacement field vectors -->
+    <g opacity="0.45" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 3">
+      <line x1="156" y1="64" x2="182" y2="48"/>
+      <line x1="192" y1="128" x2="218" y2="112"/>
+      <line x1="156" y1="192" x2="182" y2="176"/>
+    </g>
+
+    <!-- Ghost / Original Right Bracket footprint -->
+    <path d="M 156 64 L 192 128 L 156 192"
+          stroke="#475569" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+          stroke-dasharray="4 6" opacity="0.6"/>
+
+    <!-- Classification Spectrum Channels -->
+    <g>
+      <line x1="98" y1="94" x2="152" y2="94" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 3" opacity="0.9"/>
+      <circle cx="158" cy="94" r="3.5" fill="#10b981"/>
+    </g>
+    <g>
+      <line x1="84" y1="128" x2="182" y2="128" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4" opacity="0.9"/>
+      <polygon points="187,128 181,124 181,132" fill="#f59e0b"/>
+    </g>
+    <g>
+      <line x1="98" y1="162" x2="142" y2="162" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+      <polygon points="146,162 139,158 139,166" fill="#f43f5e"/>
+      <line x1="154" y1="162" x2="180" y2="162" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="186,162 178,157.5 178,166.5" fill="#38bdf8"/>
+    </g>
+
+    <!-- Left Bracket -->
+    <g filter="url(#b-cyan-glow)">
+      <path d="M 102 64 L 66 128 L 102 192"
+            stroke="url(#emblem-v1-grad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="66" cy="128" r="4" fill="#ffffff"/>
+    </g>
+
+    <!-- Drifted Right Bracket -->
+    <g filter="url(#b-drift-glow)">
+      <path d="M 182 48 L 218 112 L 182 176"
+            stroke="url(#emblem-drift-grad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="218" cy="112" r="4" fill="#fffbeb"/>
+    </g>
+
+    <!-- Central Delta Symbol -->
+    <g filter="url(#b-core-glow)">
+      <polygon points="128,100 144,128 112,128"
+               fill="#0f172a" fill-opacity="0.8"
+               stroke="url(#emblem-delta-grad)" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="128" cy="119" r="2.5" fill="#38bdf8"/>
+    </g>
+  </g>
+
+  <!-- Main Content Area (Right) -->
+  <g transform="translate(370, 72)">
+    <!-- Header row: Title + Badges -->
+    <g transform="translate(0, 42)">
+      <text x="0" y="0" font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="52" fill="#f8fafc" letter-spacing="-1.5">
+        api<tspan fill="url(#title-grad)">-drift</tspan>
+      </text>
+
+      <!-- Pill Badges -->
+      <g transform="translate(252, -34)">
+        <rect x="0" y="0" width="70" height="30" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="35" y="20" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="13" font-weight="700" fill="#38bdf8">v0.1.0</text>
+      </g>
+
+      <g transform="translate(332, -34)">
+        <rect x="0" y="0" width="136" height="30" rx="8" fill="#064e3b" fill-opacity="0.5" stroke="#059669" stroke-width="1.5"/>
+        <text x="68" y="20" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="700" fill="#34d399">ZERO-DEP CORE</text>
+      </g>
+
+      <g transform="translate(478, -34)">
+        <rect x="0" y="0" width="168" height="30" rx="8" fill="#1e293b" fill-opacity="0.6" stroke="#475569" stroke-width="1.5"/>
+        <text x="84" y="20" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="700" fill="#cbd5e1">FAIL-CLOSED CONTRACTS</text>
+      </g>
+
+      <g transform="translate(656, -34)">
+        <rect x="0" y="0" width="108" height="30" rx="8" fill="#451a03" fill-opacity="0.5" stroke="#d97706" stroke-width="1.5"/>
+        <text x="54" y="20" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="700" fill="#f59e0b">POLICY LAYER</text>
+      </g>
+    </g>
+
+    <!-- Tagline -->
+    <text x="0" y="82" font-family="'Inter', sans-serif" font-weight="500" font-size="18" fill="#e2e8f0" letter-spacing="-0.2">
+      Public surface diffing, break classification, and mechanical patch suggestion
+    </text>
+
+    <text x="0" y="112" font-family="'Inter', sans-serif" font-weight="400" font-size="14.5" fill="#94a3b8">
+      What changed. How bad is it. What edit fixes it — as data a script, an agent, or a person can act on.
+    </text>
+
+    <!-- Architectural Pipeline Panel -->
+    <g transform="translate(0, 142)">
+      <!-- Panel box -->
+      <rect x="0" y="0" width="790" height="150" rx="14" fill="#070c18" stroke="#1e293b" stroke-width="1.5"/>
+
+      <!-- Pipeline Title Bar -->
+      <path d="M 0 14 Q 0 0 14 0 L 776 0 Q 790 0 790 14 L 790 32 L 0 32 Z" fill="#0e1526"/>
+      <line x1="0" y1="32" x2="790" y2="32" stroke="#1e293b" stroke-width="1"/>
+      <text x="16" y="21" font-family="'JetBrainsMono NF', monospace" font-size="11" font-weight="700" fill="#64748b" letter-spacing="1">PIPELINE EXECUTION FLOW</text>
+
+      <!-- Severity legend in panel header -->
+      <g transform="translate(470, 21)" font-family="'Inter', sans-serif" font-size="11" font-weight="600">
+        <circle cx="0" cy="-4" r="3.5" fill="#10b981"/>
+        <text x="8" y="0" fill="#94a3b8">Compatible</text>
+
+        <polygon points="86,-7 90,0 82,0" fill="#f59e0b"/>
+        <text x="96" y="0" fill="#94a3b8">Warning</text>
+
+        <rect x="156" y="-7" width="7" height="7" rx="1.5" fill="#f43f5e"/>
+        <text x="168" y="0" fill="#94a3b8">Breaking</text>
+
+        <text x="240" y="0" font-family="'JetBrainsMono NF', monospace" fill="#38bdf8">auto=true</text>
+      </g>
+
+      <!-- Flow Nodes -->
+      <g transform="translate(20, 52)">
+        <!-- Node 1: Producer -->
+        <g transform="translate(0, 0)">
+          <rect x="0" y="0" width="112" height="68" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+          <text x="56" y="24" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="700" fill="#38bdf8">producer</text>
+          <text x="56" y="44" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10.5" fill="#64748b">rustdoc JSON</text>
+          <text x="56" y="58" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="9" fill="#475569">[producer]</text>
+        </g>
+
+        <!-- Connector 1 -->
+        <text x="122" y="38" font-family="'JetBrainsMono NF', monospace" font-size="14" fill="#64748b">──▶</text>
+
+        <!-- Node 2: ApiSnapshot -->
+        <g transform="translate(150, 0)">
+          <rect x="0" y="0" width="120" height="68" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+          <text x="60" y="24" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="700" fill="#38bdf8">ApiSnapshot</text>
+          <text x="60" y="44" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10.5" fill="#64748b">versioned items</text>
+          <text x="60" y="58" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="9" fill="#475569">sha256 hash</text>
+        </g>
+
+        <!-- Connector 2 -->
+        <text x="280" y="38" font-family="'JetBrainsMono NF', monospace" font-size="14" fill="#64748b">──▶</text>
+
+        <!-- Node 3: diff -->
+        <g transform="translate(308, 0)">
+          <rect x="0" y="0" width="112" height="68" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+          <text x="56" y="24" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="700" fill="#38bdf8">diff</text>
+          <text x="56" y="44" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10.5" fill="#64748b">ApiDiff</text>
+          <text x="56" y="58" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="9" fill="#475569">add/rm/change</text>
+        </g>
+
+        <!-- Connector 3 -->
+        <text x="430" y="38" font-family="'JetBrainsMono NF', monospace" font-size="14" fill="#64748b">──▶</text>
+
+        <!-- Node 4: classify -->
+        <g transform="translate(458, 0)">
+          <rect x="0" y="0" width="124" height="68" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-opacity="0.6" stroke-width="1"/>
+          <text x="62" y="24" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="700" fill="#f59e0b">classify</text>
+          <text x="62" y="44" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10.5" fill="#cbd5e1">ClassifiedBreak</text>
+          <text x="62" y="58" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="9" fill="#f59e0b">Severity policy</text>
+        </g>
+
+        <!-- Connector 4 -->
+        <text x="592" y="38" font-family="'JetBrainsMono NF', monospace" font-size="14" fill="#64748b">──▶</text>
+
+        <!-- Node 5: suggest -->
+        <g transform="translate(620, 0)">
+          <rect x="0" y="0" width="128" height="68" rx="8" fill="#064e3b" fill-opacity="0.3" stroke="#10b981" stroke-width="1.2"/>
+          <text x="64" y="24" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="12" font-weight="700" fill="#34d399">suggest</text>
+          <text x="64" y="44" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10.5" fill="#a7f3d0">SuggestionAction</text>
+          <text x="64" y="58" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="9" fill="#34d399">auto-appliable</text>
+        </g>
+      </g>
+
+      <!-- Panel bottom meta line -->
+      <g transform="translate(20, 134)" font-family="'JetBrainsMono NF', monospace" font-size="10" fill="#64748b">
+        <text x="0" y="0">✓ Core: pure std &amp; zero deps</text>
+        <text x="230" y="0">✓ Conservative: signature moves = Breaking</text>
+        <text x="540" y="0">✓ Fail-closed: verified content hash</text>
+      </g>
+    </g>
+  </g>
+</svg>

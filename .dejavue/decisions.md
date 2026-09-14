@@ -56,3 +56,13 @@ Captain wants newer projects public and release-ready; first CI run failed becau
 
 Author type: agent
 
+
+## 2026-09-14T18:46:26-05:00 — [ARCHITECTURAL] Visual branding identity: differential drift bracket emblem, full vector SVG suite, raster icons/banners, ANSI TrueColor terminal banner, and brand guidelines
+
+Reason:
+Establish a cohesive, recognizable visual identity for api-drift reflecting baseline contract vs. mutational drift and classification channels
+
+Artifacts: docs/BRANDING.md, assets/branding/api-drift-banner.svg, assets/branding/api-drift-logo.svg, assets/branding/api-drift-icon.svg
+
+Author type: agent
+

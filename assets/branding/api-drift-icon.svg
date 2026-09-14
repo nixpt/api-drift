@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="icon-bg-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e1526"/>
+      <stop offset="50%" stop-color="#0a0e1a"/>
+      <stop offset="100%" stop-color="#05070e"/>
+    </linearGradient>
+
+    <linearGradient id="icon-border-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.5"/>
+      <stop offset="40%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Radial ambient glow -->
+    <radialGradient id="icon-ambient-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.25"/>
+      <stop offset="60%" stop-color="#0f172a" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#0a0e1a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Gradients for the emblem -->
+    <linearGradient id="icon-v1-grad" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="icon-drift-grad" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+
+    <linearGradient id="icon-delta-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+
+    <!-- Glow filters -->
+    <filter id="icon-cyan-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="icon-drift-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="icon-core-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Container Squircle Background -->
+  <rect x="28" y="28" width="456" height="456" rx="96" fill="url(#icon-bg-grad)" stroke="url(#icon-border-grad)" stroke-width="3"/>
+  <rect x="34" y="34" width="444" height="444" rx="90" fill="none" stroke="#38bdf8" stroke-opacity="0.12" stroke-width="1.5"/>
+
+  <!-- Subtle Blueprint / Grid Background -->
+  <g opacity="0.08" stroke="#38bdf8" stroke-width="1">
+    <line x1="80" y1="128" x2="432" y2="128"/>
+    <line x1="80" y1="192" x2="432" y2="192"/>
+    <line x1="80" y1="256" x2="432" y2="256"/>
+    <line x1="80" y1="320" x2="432" y2="320"/>
+    <line x1="80" y1="384" x2="432" y2="384"/>
+    <line x1="128" y1="80" x2="128" y2="432"/>
+    <line x1="192" y1="80" x2="192" y2="432"/>
+    <line x1="256" y1="80" x2="256" y2="432"/>
+    <line x1="320" y1="80" x2="320" y2="432"/>
+    <line x1="384" y1="80" x2="384" y2="432"/>
+  </g>
+
+  <!-- Ambient Core Glow -->
+  <circle cx="256" cy="256" r="190" fill="url(#icon-ambient-glow)"/>
+
+  <!-- Centered Emblem (Scaled from 256x256 to ~360x360 with origin at 256,256) -->
+  <g transform="translate(256, 256) scale(1.42) translate(-128, -128)">
+    <!-- Drift displacement field vectors (ghost to drifted position) -->
+    <g opacity="0.45" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 3">
+      <line x1="156" y1="64" x2="182" y2="48"/>
+      <line x1="192" y1="128" x2="218" y2="112"/>
+      <line x1="156" y1="192" x2="182" y2="176"/>
+    </g>
+
+    <!-- Ghost / Original Right Bracket footprint (Pre-drift baseline v1) -->
+    <path d="M 156 64 L 192 128 L 156 192"
+          stroke="#475569" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+          stroke-dasharray="4 6" opacity="0.6"/>
+
+    <!-- Classification Spectrum Channels (Compatible, Warning, Breaking) -->
+    <!-- Upper Channel: Compatible (Emerald #10b981) -->
+    <g>
+      <line x1="98" y1="94" x2="152" y2="94" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 3" opacity="0.9"/>
+      <circle cx="158" cy="94" r="3.5" fill="#10b981"/>
+    </g>
+
+    <!-- Mid Channel: Warning (Solar Amber #f59e0b) -->
+    <g>
+      <line x1="84" y1="128" x2="182" y2="128" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4" opacity="0.9"/>
+      <polygon points="187,128 181,124 181,132" fill="#f59e0b"/>
+    </g>
+
+    <!-- Lower Channel: Breaking (Crimson #f43f5e) & Auto-fix suggestion (Azure #38bdf8) -->
+    <g>
+      <line x1="98" y1="162" x2="142" y2="162" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+      <polygon points="146,162 139,158 139,166" fill="#f43f5e"/>
+      <line x1="154" y1="162" x2="180" y2="162" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="186,162 178,157.5 178,166.5" fill="#38bdf8"/>
+    </g>
+
+    <!-- Left Bracket (v1 Stable Contract Baseline) -->
+    <g filter="url(#icon-cyan-glow)">
+      <path d="M 102 64 L 66 128 L 102 192"
+            stroke="url(#icon-v1-grad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="66" cy="128" r="4" fill="#ffffff"/>
+    </g>
+
+    <!-- Drifted Right Bracket (v2 Mutated / Drifted Surface) -->
+    <g filter="url(#icon-drift-glow)">
+      <path d="M 182 48 L 218 112 L 182 176"
+            stroke="url(#icon-drift-grad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="218" cy="112" r="4" fill="#fffbeb"/>
+    </g>
+
+    <!-- Central Delta Symbol (Differential Core) -->
+    <g filter="url(#icon-core-glow)">
+      <polygon points="128,100 144,128 112,128"
+               fill="#0f172a" fill-opacity="0.8"
+               stroke="url(#icon-delta-grad)" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="128" cy="119" r="2.5" fill="#38bdf8"/>
+    </g>
+  </g>
+
+  <!-- Bottom Accent Tag: "API-DRIFT" subtle watermark -->
+  <text x="256" y="442" text-anchor="middle" font-family="'JetBrainsMono NF', monospace" font-size="14" font-weight="700" letter-spacing="4" fill="#475569" opacity="0.7">API-DRIFT</text>
+</svg>
