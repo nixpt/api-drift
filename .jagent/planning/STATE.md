@@ -2,7 +2,7 @@
 
 **Updated:** 2026-09-14
 **Milestone focus:** M1 core hardening done (APIDRIFT-4); M2 embedded-ledger track open
-**Branch:** `master` (no commits, no remote — planning said `main`; rename or accept on first commit)
+**Branch:** `main` @ `nixpt/api-drift` (private, pushed `4d9841f`)
 
 ## Delivery snapshot
 
@@ -19,13 +19,11 @@
 
 ## Active work
 
-_APIDRIFT-4 landed in-tree, uncommitted. Next: APIDRIFT-5 (see TASKS.md for
+_APIDRIFT-4 landed and pushed (`4d9841f`). Next: APIDRIFT-5 (see TASKS.md for
 the full 5→6→8+9→7→10→11 order)._
 
 ## Blockers
 
-- Repo has no commits and no remote; git is on `master` while planning says
-  `main`. Decide on first commit (rename to `main` or update planning).
 - `/build` 100% full — builds run on `/tmp/api-drift-target`; real arniko
   rustdoc snapshots wait on disk budget.
 

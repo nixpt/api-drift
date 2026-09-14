@@ -5,7 +5,6 @@ complex work goes in `.jagent/planning/tickets/` instead.
 
 ## HIGH
 
-- [ ] Decide `master` vs `main` + first commit + remote (planning says `main`, git says `master`, zero commits)
 - [ ] APIDRIFT-5: action enum + attrs + serde + snapshot format v1
 
 ## MEDIUM
