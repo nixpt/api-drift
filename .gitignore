@@ -1,0 +1,5 @@
+/target
+.sccache/
+
+# live agent-sync channel (per-checkout, never committed)
+.jagent/sync/

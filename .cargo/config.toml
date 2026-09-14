@@ -1,0 +1,11 @@
+# Rust dev config (nixpt-dev). Committed by `nixpt-dev init --type rust`.
+# Uncomment what you need.
+
+[alias]
+bt = "test"
+bc = "check --all-targets"
+bcl = "clippy --all-targets -- -D warnings"
+br = "build --release"
+
+# [build]
+# rustc-wrapper = "sccache"   # enable if sccache is installed (env RUSTC_WRAPPER also works)

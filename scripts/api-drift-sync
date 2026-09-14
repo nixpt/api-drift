@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# Repo-local front door to jokersquad's agent-sync. Same protocol as bro-cli/docs/SYNC.md.
+set -euo pipefail
+
+die() { printf 'api-drift-sync: %s\n' "$*" >&2; exit 1; }
+usage() {
+    cat <<'EOF'
+Usage: scripts/api-drift-sync [--topic TOPIC] COMMAND [ARGS...]
+
+Commands (agent-sync):
+  init                         Create the channel if absent
+  path                         Print its absolute path
+  post MESSAGE...              Work updates or discussion
+  claim RESOURCE [MESSAGE...]  Advisory ownership announcement
+  done RESOURCE [MESSAGE...]   Release/complete a claim
+  ack ID [MESSAGE...]          Acknowledge a record
+  read [--tail N] [--raw]      Read recent records
+  follow [--tail N]            Follow live records (Ctrl-C to stop)
+
+Identity: APIDRIFT_AS, then AGENT_NAME, then the agent-sync user default.
+Backend: APIDRIFT_AGENT_SYNC_BIN, then agent-sync on PATH, then the local
+/workspace/projects/jokersquad/bin/agent-sync installation.
+All linked worktrees share the primary checkout's .jagent/sync/api-drift.jsonl.
+EOF
+}
+
+topic=api-drift
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help) usage; exit 0 ;;
+        --topic)
+            [[ $# -ge 2 && -n "$2" ]] || die '--topic requires text'
+            topic="$2"; shift 2 ;;
+        --topic=*) topic="${1#--topic=}"; [[ -n "$topic" ]] || die '--topic requires text'; shift ;;
+        *) break ;;
+    esac
+done
+[[ $# -gt 0 ]] || { usage >&2; exit 1; }
+case "$1" in
+    init|path|post|note|claim|done|ack|read|follow) ;;
+    *) die "unknown command: $1 (see --help)" ;;
+esac
+
+# Resolve from this script, not the caller's cwd. Git lists the primary
+# worktree first; NUL-delimited records preserve spaces in checkout paths.
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+IFS= read -r -d '' primary_record < <(
+    git -C "$script_dir" worktree list --porcelain -z
+) || die 'cannot locate the primary Git checkout'
+[[ "$primary_record" == 'worktree '* ]] || die 'unexpected Git worktree record'
+primary_root="${primary_record#worktree }"
+[[ -d "$primary_root/scripts" ]] || die 'primary checkout is unavailable'
+sync_file="$primary_root/.jagent/sync/api-drift.jsonl"
+
+if [[ "$1" == path ]]; then
+    [[ $# -eq 1 ]] || die 'path takes no arguments'
+    printf '%s\n' "$sync_file"
+    exit 0
+fi
+
+backend="${APIDRIFT_AGENT_SYNC_BIN:-}"
+if [[ -z "$backend" ]]; then
+    backend="$(command -v agent-sync || true)"
+    [[ -n "$backend" ]] || backend=/workspace/projects/jokersquad/bin/agent-sync
+fi
+[[ -x "$backend" ]] || die 'agent-sync unavailable; set APIDRIFT_AGENT_SYNC_BIN to its executable path'
+command -v jq >/dev/null || die 'agent-sync requires jq'
+# Upstream permits unlocked appends without flock. Require it here so agents
+# can rely on serialized records when several writers share this channel.
+command -v flock >/dev/null || die 'shared channel requires flock'
+if [[ -n "${APIDRIFT_AS:-}" ]]; then
+    export AGENT_NAME="$APIDRIFT_AS"
+fi
+exec "$backend" --file "$sync_file" --repo "$primary_root" --topic "$topic" "$@"

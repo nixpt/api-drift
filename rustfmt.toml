@@ -1,0 +1,12 @@
+# Canonical rustfmt config (nixpt fleet). Copied by `nixpt-dev init`.
+#
+# `edition` is deliberately omitted — rustfmt infers it from Cargo.toml, so the
+# same file works for edition-2021 and edition-2024 crates.
+#
+# `imports_granularity` / `use_small_heuristics` are unstable rustfmt options:
+# they need the nightly toolchain (`cargo +nightly fmt`). On stable, rustfmt
+# warns and ignores them; the rest still applies.
+max_width = 100
+imports_granularity = "Crate"
+reorder_imports = true
+use_small_heuristics = "Default"
