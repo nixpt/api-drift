@@ -89,9 +89,7 @@ fn emit_removed_changed(
                 // sig and would double-report. `n` is the new-side winner by
                 // construction (HashMap last-write-wins), so compare the old
                 // winner against it.
-                if is_winner(old_by_path, item)
-                    && (item.sig != n.sig || item.kind != n.kind)
-                {
+                if is_winner(old_by_path, item) && (item.sig != n.sig || item.kind != n.kind) {
                     diff.changed.push(Changed {
                         path: item.path.clone(),
                         old_kind: item.kind,
@@ -121,4 +119,3 @@ fn emit_added(
 #[cfg(test)]
 #[path = "diff_tests.rs"]
 mod tests;
-

@@ -118,7 +118,11 @@ mod tests {
     fn get_finds_by_path() {
         let s = ApiSnapshot::new(
             "arniko 0.2.99",
-            vec![Item::new("arniko::Alert::new", ItemKind::Function, "pub fn new")],
+            vec![Item::new(
+                "arniko::Alert::new",
+                ItemKind::Function,
+                "pub fn new",
+            )],
         );
         assert!(s.get("arniko::Alert::new").is_some());
         assert!(s.get("arniko::Missing").is_none());
