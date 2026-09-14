@@ -68,7 +68,10 @@ fn arniko_098_to_099_demo() {
     // badge→tag folds into one auto rename-call; legacy needs review;
     // Alert::new needs signature review; Sparkline::render is a no-op add.
     assert_eq!(fixes.len(), 4);
-    let rename = fixes.iter().find(|s| s.action == "rename-call").unwrap();
+    let rename = fixes
+        .iter()
+        .find(|s| matches!(s.action, api_drift::SuggestionAction::RenameCall { .. }))
+        .unwrap();
     assert!(rename.auto_appliable);
     assert!(rename.detail.contains("arniko::badge -> arniko::tag"));
 
@@ -77,6 +80,6 @@ fn arniko_098_to_099_demo() {
         println!("[{:?}/{:?}] {} — {}", b.severity, b.kind, b.path, b.note);
     }
     for s in &fixes {
-        println!("suggest {} [{}]: {}", s.path, s.action, s.detail);
+        println!("suggest {} [{}]: {}", s.path, s.action.name(), s.detail);
     }
 }

@@ -8,6 +8,7 @@
 /// What kind of public item this is. Used by `classify` to tell a
 /// struct-field removal apart from a function-signature change.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ItemKind {
     Function,
     Method,
@@ -25,6 +26,7 @@ pub enum ItemKind {
 
 /// One public item in a crate's surface.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Item {
     /// Canonical path, e.g. `arniko::Alert::new`.
     pub path: String,
@@ -33,16 +35,43 @@ pub struct Item {
     /// Rendered signature, e.g. `pub fn new(message: &str) -> Self`.
     /// Compared verbatim by `diff`; interpreted by `classify`.
     pub sig: String,
+    /// Attribute markers the producer observed, e.g. `deprecated`,
+    /// `non_exhaustive`. Empty by default; `classify` reads them to adjust
+    /// severity (deprecated removals still break, non-exhaustive additions
+    /// downgrade). Producers record presence, not full attribute syntax.
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub attrs: Vec<String>,
 }
 
 impl Item {
-    /// Build an item from anything string-like.
+    /// Build an item from anything string-like. `attrs` starts empty; use
+    /// [`Item::with_attr`] / [`Item::with_attrs`] to record markers.
     pub fn new(path: &str, kind: ItemKind, sig: &str) -> Self {
         Self {
             path: path.to_owned(),
             kind,
             sig: sig.to_owned(),
+            attrs: Vec::new(),
         }
+    }
+
+    /// Record one attribute marker (builder style).
+    #[must_use]
+    pub fn with_attr(mut self, attr: &str) -> Self {
+        self.attrs.push(attr.to_owned());
+        self
+    }
+
+    /// Record several attribute markers (builder style).
+    #[must_use]
+    pub fn with_attrs(mut self, attrs: &[&str]) -> Self {
+        self.attrs.extend(attrs.iter().map(|a| (*a).to_owned()));
+        self
+    }
+
+    /// True when the producer recorded the given marker.
+    pub fn has_attr(&self, attr: &str) -> bool {
+        self.attrs.iter().any(|a| a == attr)
     }
 }
 

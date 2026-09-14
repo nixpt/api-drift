@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | ready |
+| **Status** | done |
 | **Milestone** | M2 |
 | **Size** | S–M |
 | **Owner** | unassigned |
@@ -30,14 +30,39 @@ file format v1 with content hash.
 
 ## Acceptance
 
-- [ ] Enum covers all current string actions (`rename-call`, `review-rename`,
+- [x] Enum covers all current string actions (`rename-call`, `review-rename`,
       `remove-item`, `review-signature`, `review-kind`, `no-op`,
-      `add-match-arm`, `review-field`)
-- [ ] attrs flow from producer into classify severity
-- [ ] Snapshot v1 round-trips with a verifiable content hash
-- [ ] `cargo test` green (or the project's equivalent)
+      `add-match-arm`, `review-field`) — `action_names_frozen` test
+- [x] attrs flow from producer into classify severity
+- [x] Snapshot v1 round-trips with a verifiable content hash
+- [x] `cargo test` green: 26 base / 30 serde / 36 producer / 36 both, +1 doctest; clippy `-D warnings` clean on all four
 
 ## Notes
 
 Design doc `docs/DESIGN-embedded-ledger.md` § Layers (serialization row).
 Depends on APIDRIFT-4 (landed).
+
+## Resolution
+
+- `suggest.rs`: `SuggestionAction` enum (8 variants, frozen `name()` strings,
+  `action_names_frozen` guards renames) replaces the string `action`;
+  `RenameCall`/`ReviewRename` carry `{from,to}`, `AddMatchArm` carries
+  `{enum_path, variant}` split from the break path, `ReviewSignature`
+  carries `{old,new}`, `ReviewField` carries `{field}`.
+- `snapshot.rs`: `Item.attrs: Vec<String>` + `with_attr`/`with_attrs`/
+  `has_attr`; serde derives on `ItemKind`/`Item`.
+- `classify.rs`: serde derives on all three enums/structs; Added
+  `Variant`/`Field` downgrade to Compatible when `deprecated` or
+  `non_exhaustive`; deprecated removals noted in the break note.
+- `producer.rs`: `collect_attrs` reads rustdoc `deprecation` (non-null) +
+  `attrs` list (string or object encoding) → `deprecated`/`non_exhaustive`
+  markers; `attrs_flow_from_nodes` regression test.
+- `snapshot_file.rs` (new, `serde` feature): `SnapshotFile` envelope
+  (`api-drift/snapshot/v1` + surface + version + sorted items +
+  `content_hash`), `content_hash` = sha256 over `path\0kind\0sig\0sorted-
+  attrs\0` lines, `parse_snapshot_file` fails closed on format mismatch or
+  hash mismatch; round-trip / tamper / wrong-format / order-stability tests.
+- Feature graph: `serde` = serde + serde_json + sha2 + hex; `producer` now
+  implies `serde` (producer already needed serde_json). Core (no features)
+  stays pure std.
+

@@ -9,6 +9,7 @@ use crate::snapshot::{Item, ItemKind};
 
 /// How bad is this for a downstream consumer?
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Severity {
     /// Additive only (new item, new defaulted param): downstream still builds.
     Compatible,
@@ -20,6 +21,7 @@ pub enum Severity {
 
 /// The shape of one break.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum BreakKind {
     /// Path only in the new snapshot. Additive, compatible.
     Added,
@@ -34,6 +36,7 @@ pub enum BreakKind {
 
 /// One diff entry with its label.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClassifiedBreak {
     /// Canonical path of the affected item.
     pub path: String,
@@ -70,10 +73,18 @@ pub fn classify_diff(diff: &ApiDiff) -> Vec<ClassifiedBreak> {
 
 fn classify_added(item: &Item) -> ClassifiedBreak {
     // New enum variants / new public fields break exhaustive matches and
-    // struct literals downstream: Warning, not Compatible. Everything else
+    // struct literals downstream: Warning, not Compatible — unless the enum
+    // is `non_exhaustive` (downstream must already wildcard) or the item is
+    // `deprecated` (signals don't-use, not don't-compile). Everything else
     // additive stays Compatible.
     let severity = match item.kind {
-        ItemKind::Variant | ItemKind::Field => Severity::Warning,
+        ItemKind::Variant | ItemKind::Field => {
+            if item.has_attr("non_exhaustive") || item.has_attr("deprecated") {
+                Severity::Compatible
+            } else {
+                Severity::Warning
+            }
+        }
         _ => Severity::Compatible,
     };
     ClassifiedBreak {
@@ -83,11 +94,22 @@ fn classify_added(item: &Item) -> ClassifiedBreak {
         severity,
         old_sig: None,
         new_sig: Some(item.sig.clone()),
-        note: format!("added {:?} {}", item.kind, item.path),
+        note: if item.attrs.is_empty() {
+            format!("added {:?} {}", item.kind, item.path)
+        } else {
+            format!("added {:?} {} [{}]", item.kind, item.path, item.attrs.join(", "))
+        },
     }
 }
 
 fn classify_removed(item: &Item) -> ClassifiedBreak {
+    // Deprecated removals were announced; still Breaking (refs fail to
+    // resolve) but the note says so, so triage reads it first.
+    let note = if item.has_attr("deprecated") {
+        format!("removed deprecated {:?} {}", item.kind, item.path)
+    } else {
+        format!("removed {:?} {}", item.kind, item.path)
+    };
     ClassifiedBreak {
         path: item.path.clone(),
         kind: BreakKind::Removed,
@@ -95,7 +117,7 @@ fn classify_removed(item: &Item) -> ClassifiedBreak {
         severity: Severity::Breaking,
         old_sig: Some(item.sig.clone()),
         new_sig: None,
-        note: format!("removed {:?} {}", item.kind, item.path),
+        note,
     }
 }
 

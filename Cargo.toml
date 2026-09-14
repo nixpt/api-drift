@@ -8,12 +8,18 @@ repository = "https://github.com/nixpt/api-drift"
 
 [features]
 default = []
-# rustdoc-JSON → ApiSnapshot producer (APIDRIFT-2). Pulls serde_json only here;
-# the snapshot/diff/classify/suggest core stays pure std, zero deps.
-producer = ["dep:serde_json"]
+# rustdoc-JSON → ApiSnapshot producer (APIDRIFT-2). Pulls serde_json only here.
+producer = ["dep:serde_json", "serde"]
+# Serialization for the embedded ledger (APIDRIFT-5): serde derives on
+# snapshot/break/suggestion types, snapshot file format v1, content hashing
+# (sha256). The core stays pure std without this.
+serde = ["dep:serde", "dep:serde_json", "dep:sha2", "dep:hex"]
 
 [dependencies]
+serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
+sha2 = { version = "0.10", optional = true }
+hex = { version = "0.4", optional = true }
 
 [dev-dependencies]
 serde_json = "1"

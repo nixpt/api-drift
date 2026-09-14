@@ -32,7 +32,7 @@ See `milestones/M0-core-pipeline.md`.
 
 ### M2 — Embedded ledger (order: 5 → 6 → 8+9 → 7 → 10 → 11)
 
-- [ ] action enum + attrs + serde + snapshot v1 — APIDRIFT-5 (ready)
+- [x] action enum + attrs + serde + snapshot v1 — APIDRIFT-5
 - [ ] Surface + ledger crate + dogfood — APIDRIFT-6
 - [ ] protocol surface + bro-tui embed — APIDRIFT-8 ∥ consumer + bro-desktop — APIDRIFT-9
 - [ ] rust-public surface + arniko ledger demo — APIDRIFT-7 (folds in APIDRIFT-2)

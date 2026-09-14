@@ -5,11 +5,10 @@ complex work goes in `.jagent/planning/tickets/` instead.
 
 ## HIGH
 
-- [ ] APIDRIFT-5: action enum + attrs + serde + snapshot format v1
+- [ ] APIDRIFT-6: Surface trait + ledger crate + dogfood
 
 ## MEDIUM
 
-- [ ] APIDRIFT-6: Surface trait + ledger crate + dogfood
 - [ ] Coordinate APIDRIFT-8/9 with bro-cli BRO-98's horse (bro-acp pair)
 
 ## LOW

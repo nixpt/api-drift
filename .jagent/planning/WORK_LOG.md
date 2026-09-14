@@ -33,6 +33,26 @@ live against format v61 (55 public items). `tests/arniko_demo.rs` end-to-end.
 ### 📂 Files Modified
 - `src/producer.rs`, `tests/arniko_demo.rs`, `Cargo.toml` (feature + dev-deps)
 
+## [2026-09-14] - APIDRIFT-5 action enum + serde + snapshot v1 ✅
+
+### 📝 Summary
+`SuggestionAction` enum (8 frozen verbs) replaces the string action, carrying
+structured fields (`RenameCall{from,to}`, `AddMatchArm{enum_path,variant}`,
+`ReviewSignature{old,new}`, `ReviewField{field}`). `Item.attrs` + producer
+`collect_attrs` (`deprecated`/`non_exhaustive`); classify downgrades
+Variant/Field additions under those markers. New `snapshot_file.rs` (`serde`
+feature): format v1 envelope + sha256 content hash, fail-closed verification.
+Feature graph: `serde` = serde+serde_json+sha2+hex; `producer` implies `serde`.
+
+### 📂 Files Modified
+- `src/suggest.rs` (enum), `src/snapshot.rs` (attrs), `src/classify.rs`
+  (serde + attr severity), `src/producer.rs` (collect_attrs),
+  `src/snapshot_file.rs` (new), `src/lib.rs`, `Cargo.toml`,
+  `tests/arniko_demo.rs`, planning tree
+
+### 🔗 References
+- `docs/DESIGN-embedded-ledger.md` § Layers (serialization row)
+
 ## [2026-09-14] - APIDRIFT-4 core correctness ✅
 
 ### 📝 Summary

@@ -39,8 +39,15 @@ pub mod snapshot;
 pub mod suggest;
 #[cfg(feature = "producer")]
 pub mod producer;
+#[cfg(feature = "serde")]
+pub mod snapshot_file;
 
 pub use classify::{BreakKind, ClassifiedBreak, Severity};
 pub use diff::ApiDiff;
 pub use snapshot::{ApiSnapshot, Item, ItemKind};
-pub use suggest::Suggestion;
+pub use suggest::{Suggestion, SuggestionAction};
+#[cfg(feature = "serde")]
+pub use snapshot_file::{
+    SnapshotFile, SnapshotFileError, content_hash, parse_snapshot_file,
+    render_snapshot_file, to_string_pretty,
+};

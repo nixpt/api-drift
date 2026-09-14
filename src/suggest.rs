@@ -5,20 +5,94 @@
 //! decides how to render them as patches.
 
 use crate::classify::{BreakKind, ClassifiedBreak};
+use crate::snapshot::ItemKind;
 
-/// A mechanical downstream edit.
+/// A mechanical downstream edit, in machine-matchable form.
+///
+/// `action` is the stable enum downstream matches on; `detail` is the
+/// rendered human form; `auto_appliable` gates script application. The
+/// string `name()`s are frozen (serde + ledger files depend on them) —
+/// add variants, never rename.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Suggestion {
     /// Canonical path of the affected upstream item.
     pub path: String,
-    /// What the downstream should do, in verbs (`rename-call`,
-    /// `add-arg`, `remove-item`, `review-signature`, …).
-    pub action: String,
+    /// Structured edit verb. See [`SuggestionAction`].
+    pub action: SuggestionAction,
     /// Human-readable detail, e.g. `rename arniko::Foo -> arniko::Bar`.
     pub detail: String,
     /// True when a script can apply this without judgment (pure rename with
     /// a known target). False means a human/agent must review first.
     pub auto_appliable: bool,
+}
+
+/// The edit verb, with the fields the applier needs. Covers every action the
+/// core emits today:
+///
+/// - `rename-call` / `review-rename` (rename fold, confident or not)
+/// - `remove-item` (removal), `review-kind` (kind change)
+/// - `review-signature` (sig change), `review-field` (new field)
+/// - `add-match-arm` (new variant — the `BackendEvent` case)
+/// - `no-op` (pure addition)
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SuggestionAction {
+    /// Confident rename: rewrite call sites `from` → `to`. Auto-appliable.
+    RenameCall {
+        /// Removed path.
+        from: String,
+        /// Added path.
+        to: String,
+    },
+    /// Possible rename, weak signal: verify sigs first. Never auto.
+    ReviewRename {
+        /// Removed path.
+        from: String,
+        /// Added path.
+        to: String,
+    },
+    /// Upstream item is gone: drop or gate downstream uses.
+    RemoveItem,
+    /// Same path, new signature: update call sites `old` → `new`.
+    ReviewSignature {
+        /// Previous signature.
+        old: String,
+        /// New signature.
+        new: String,
+    },
+    /// Same path, new `ItemKind`: rework usage.
+    ReviewKind,
+    /// New enum variant: add a match arm for `variant` of `enum_path`.
+    AddMatchArm {
+        /// Path of the enum, e.g. `bro::BackendEvent`.
+        enum_path: String,
+        /// New variant name, e.g. `Partial`.
+        variant: String,
+    },
+    /// New struct field: check struct literals for `field`.
+    ReviewField {
+        /// New field path.
+        field: String,
+    },
+    /// Pure addition: nothing to do downstream.
+    NoOp,
+}
+
+impl SuggestionAction {
+    /// Frozen string name (serde + ledger files depend on it).
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::RenameCall { .. } => "rename-call",
+            Self::ReviewRename { .. } => "review-rename",
+            Self::RemoveItem => "remove-item",
+            Self::ReviewSignature { .. } => "review-signature",
+            Self::ReviewKind => "review-kind",
+            Self::AddMatchArm { .. } => "add-match-arm",
+            Self::ReviewField { .. } => "review-field",
+            Self::NoOp => "no-op",
+        }
+    }
 }
 
 /// Suggest one edit per classified break.
@@ -40,10 +114,14 @@ pub fn suggest_for_breaks(breaks: &[ClassifiedBreak]) -> Vec<Suggestion> {
             renames.iter().find(|(_, to, _)| to == &b.path)
         {
             if *confident {
+                let detail = format!("rename {from} -> {to} at call sites");
                 out.push(Suggestion {
                     path: b.path.clone(),
-                    action: "rename-call".to_owned(),
-                    detail: format!("rename {from} -> {to} at call sites"),
+                    action: SuggestionAction::RenameCall {
+                        from: from.clone(),
+                        to: to.clone(),
+                    },
+                    detail,
                     auto_appliable: true,
                 });
             } else {
@@ -62,7 +140,10 @@ pub fn suggest_for_breaks(breaks: &[ClassifiedBreak]) -> Vec<Suggestion> {
 fn rename_review_for(b: &ClassifiedBreak, from: &str, to: &str) -> Suggestion {
     Suggestion {
         path: b.path.clone(),
-        action: "review-rename".to_owned(),
+        action: SuggestionAction::ReviewRename {
+            from: from.to_owned(),
+            to: to.to_owned(),
+        },
         detail: format!(
             "possible rename {from} -> {to}; verify sigs then rename call sites"
         ),
@@ -75,52 +156,71 @@ fn suggest_single(b: &ClassifiedBreak) -> Suggestion {
         BreakKind::Added => {
             // New variants/fields need a match arm / struct update downstream.
             let (action, detail, auto) = match b.item_kind {
-                crate::snapshot::ItemKind::Variant => (
-                    "add-match-arm",
-                    format!("add a match arm for new variant {}", b.path),
-                    false,
-                ),
-                crate::snapshot::ItemKind::Field => (
-                    "review-field",
+                ItemKind::Variant => {
+                    let (enum_path, variant) = split_variant(&b.path);
+                    (
+                        SuggestionAction::AddMatchArm {
+                            enum_path: enum_path.to_owned(),
+                            variant: variant.to_owned(),
+                        },
+                        format!("add a match arm for new variant {}", b.path),
+                        false,
+                    )
+                }
+                ItemKind::Field => (
+                    SuggestionAction::ReviewField {
+                        field: b.path.clone(),
+                    },
                     format!("new field {} may break struct literals", b.path),
                     false,
                 ),
                 _ => (
-                    "no-op",
+                    SuggestionAction::NoOp,
                     format!("new item {}; no downstream change needed", b.path),
                     true,
                 ),
             };
             Suggestion {
                 path: b.path.clone(),
-                action: action.to_owned(),
+                action,
                 detail,
                 auto_appliable: auto,
             }
         }
         BreakKind::Removed => Suggestion {
             path: b.path.clone(),
-            action: "remove-item".to_owned(),
+            action: SuggestionAction::RemoveItem,
             detail: format!("drop or gate uses of removed {}", b.path),
             auto_appliable: false,
         },
-        BreakKind::SignatureChanged => Suggestion {
-            path: b.path.clone(),
-            action: "review-signature".to_owned(),
-            detail: format!(
-                "update call sites of {}: `{}` -> `{}`",
-                b.path,
-                b.old_sig.as_deref().unwrap_or("?"),
-                b.new_sig.as_deref().unwrap_or("?"),
-            ),
-            auto_appliable: false,
-        },
+        BreakKind::SignatureChanged => {
+            let old = b.old_sig.clone().unwrap_or_else(|| "?".to_owned());
+            let new = b.new_sig.clone().unwrap_or_else(|| "?".to_owned());
+            Suggestion {
+                path: b.path.clone(),
+                action: SuggestionAction::ReviewSignature {
+                    old: old.clone(),
+                    new: new.clone(),
+                },
+                detail: format!("update call sites of {}: `{old}` -> `{new}`", b.path),
+                auto_appliable: false,
+            }
+        }
         BreakKind::KindChanged => Suggestion {
             path: b.path.clone(),
-            action: "review-kind".to_owned(),
+            action: SuggestionAction::ReviewKind,
             detail: format!("item {} changed kind; rework usage", b.path),
             auto_appliable: false,
         },
+    }
+}
+
+/// Split `enum::Path::Variant` into (`enum::Path`, `Variant`).
+/// No `::` → (`""`, whole path); never panics.
+fn split_variant(path: &str) -> (&str, &str) {
+    match path.rfind("::") {
+        Some(i) => (&path[..i], &path[i + 2..]),
+        None => ("", path),
     }
 }
 
@@ -229,7 +329,7 @@ fn parent_of(path: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::classify::{BreakKind, ClassifiedBreak, Severity};
+    use crate::classify::Severity;
     use crate::snapshot::ItemKind;
 
     fn brk(path: &str, kind: BreakKind, item_kind: ItemKind) -> ClassifiedBreak {
@@ -282,7 +382,7 @@ mod tests {
         ];
         let out = suggest_for_breaks(&breaks);
         assert_eq!(out.len(), 1);
-        assert_eq!(out[0].action, "rename-call");
+        assert!(matches!(out[0].action, SuggestionAction::RenameCall { .. }));
         assert!(out[0].auto_appliable);
     }
 
@@ -293,7 +393,7 @@ mod tests {
             BreakKind::Removed,
             ItemKind::Function,
         )]);
-        assert_eq!(out[0].action, "remove-item");
+        assert!(matches!(out[0].action, SuggestionAction::RemoveItem));
         assert!(!out[0].auto_appliable);
     }
 
@@ -304,7 +404,7 @@ mod tests {
             BreakKind::Added,
             ItemKind::Function,
         )]);
-        assert_eq!(out[0].action, "no-op");
+        assert!(matches!(out[0].action, SuggestionAction::NoOp));
         assert!(out[0].auto_appliable);
     }
 
@@ -316,7 +416,7 @@ mod tests {
         ];
         let out = suggest_for_breaks(&breaks);
         assert_eq!(out.len(), 2);
-        assert!(out.iter().all(|s| s.action != "rename-call"));
+        assert!(out.iter().all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
     }
 
     #[test]
@@ -341,9 +441,9 @@ mod tests {
         ];
         let out = suggest_for_breaks(&breaks);
         assert_eq!(out.len(), 2);
-        assert!(out.iter().all(|s| s.action != "rename-call"));
+        assert!(out.iter().all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
         // The Field removal needs review; the lone added Method stays no-op.
-        let rm = out.iter().find(|s| s.action == "remove-item").unwrap();
+        let rm = out.iter().find(|s| matches!(s.action, SuggestionAction::RemoveItem)).unwrap();
         assert!(!rm.auto_appliable);
     }
 
@@ -368,8 +468,10 @@ mod tests {
             ),
         ];
         let out = suggest_for_breaks(&breaks);
-        let folded: Vec<&Suggestion> =
-            out.iter().filter(|s| s.action == "review-rename").collect();
+        let folded: Vec<&Suggestion> = out
+            .iter()
+            .filter(|s| matches!(s.action, SuggestionAction::ReviewRename { .. }))
+            .collect();
         if folded.is_empty() {
             // Edit distance > 8: stays two separate suggestions. Also safe.
             assert_eq!(out.len(), 2);
@@ -377,7 +479,7 @@ mod tests {
             assert_eq!(folded.len(), 1);
             assert!(!folded[0].auto_appliable);
         }
-        assert!(out.iter().all(|s| s.action != "rename-call"));
+        assert!(out.iter().all(|s| !matches!(s.action, SuggestionAction::RenameCall { .. })));
     }
 
     #[test]
@@ -387,7 +489,7 @@ mod tests {
             BreakKind::Added,
             ItemKind::Variant,
         )]);
-        assert_eq!(out[0].action, "add-match-arm");
+        assert!(matches!(out[0].action, SuggestionAction::AddMatchArm { .. }));
         assert!(!out[0].auto_appliable);
     }
 
@@ -398,8 +500,114 @@ mod tests {
             BreakKind::Added,
             ItemKind::Field,
         )]);
-        assert_eq!(out[0].action, "review-field");
+        assert!(matches!(out[0].action, SuggestionAction::ReviewField { .. }));
         assert!(!out[0].auto_appliable);
+    }
+
+    #[test]
+    fn action_names_frozen() {
+        // Ledger files + downstream match on these strings. If this fails,
+        // you renamed a verb: add a variant instead.
+        let cases = vec![
+            (
+                SuggestionAction::RenameCall {
+                    from: "a".to_owned(),
+                    to: "b".to_owned(),
+                },
+                "rename-call",
+            ),
+            (
+                SuggestionAction::ReviewRename {
+                    from: "a".to_owned(),
+                    to: "b".to_owned(),
+                },
+                "review-rename",
+            ),
+            (SuggestionAction::RemoveItem, "remove-item"),
+            (
+                SuggestionAction::ReviewSignature {
+                    old: "o".to_owned(),
+                    new: "n".to_owned(),
+                },
+                "review-signature",
+            ),
+            (SuggestionAction::ReviewKind, "review-kind"),
+            (
+                SuggestionAction::AddMatchArm {
+                    enum_path: "e::E".to_owned(),
+                    variant: "V".to_owned(),
+                },
+                "add-match-arm",
+            ),
+            (
+                SuggestionAction::ReviewField {
+                    field: "s::S::f".to_owned(),
+                },
+                "review-field",
+            ),
+            (SuggestionAction::NoOp, "no-op"),
+        ];
+        for (action, name) in cases {
+            assert_eq!(action.name(), name);
+        }
+    }
+
+    #[test]
+    fn match_arm_carries_enum_and_variant() {
+        let out = suggest_for_breaks(&[brk(
+            "bro::BackendEvent::Partial",
+            BreakKind::Added,
+            ItemKind::Variant,
+        )]);
+        assert!(
+            matches!(
+                &out[0].action,
+                SuggestionAction::AddMatchArm { enum_path, variant }
+                if enum_path == "bro::BackendEvent" && variant == "Partial"
+            ),
+            "unexpected: {:?}",
+            out[0].action
+        );
+    }
+
+    #[test]
+    fn rename_call_carries_from_to() {
+        let breaks = vec![
+            brk_sig(
+                "m::old",
+                BreakKind::Removed,
+                ItemKind::Function,
+                "pub fn old(&self)",
+                "",
+            ),
+            brk_sig(
+                "m::new",
+                BreakKind::Added,
+                ItemKind::Function,
+                "",
+                "pub fn new(&self)",
+            ),
+        ];
+        let out = suggest_for_breaks(&breaks);
+        assert!(
+            matches!(
+                &out[0].action,
+                SuggestionAction::RenameCall { from, to }
+                if from == "m::old" && to == "m::new"
+            ),
+            "unexpected: {:?}",
+            out[0].action
+        );
+    }
+
+    #[test]
+    fn attrs_builder_and_lookup() {
+        let it = crate::snapshot::Item::new("m::f", ItemKind::Function, "s")
+            .with_attr("deprecated")
+            .with_attrs(&["a", "b"]);
+        assert!(it.has_attr("deprecated"));
+        assert!(it.has_attr("a"));
+        assert!(!it.has_attr("non_exhaustive"));
     }
 }
 

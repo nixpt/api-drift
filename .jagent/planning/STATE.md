@@ -11,16 +11,15 @@
 | snapshot/diff/classify/suggest core | **shipped** | pure std, zero deps |
 | arniko rustdoc-JSON producer | **shipped** | APIDRIFT-2; `producer` feature, serde_json-gated |
 | arniko 0.2.98→0.2.99 demo | **shipped** | tests/arniko_demo.rs (synthetic rustdoc docs) |
-| core correctness (review prereqs) | **shipped** | APIDRIFT-4, uncommitted |
+| core correctness (review prereqs) | **shipped** | APIDRIFT-4 |
+| action enum + attrs + serde + snapshot v1 | **shipped** | APIDRIFT-5 |
 | embedded-ledger design | **proposed** | docs/DESIGN-embedded-ledger.md (captain+foreman review) |
-| action enum + serde + format v1 | **ready** | APIDRIFT-5 |
-| Surface + ledger crate + dogfood | **planned** | APIDRIFT-6 |
+| Surface + ledger crate + dogfood | **next** | APIDRIFT-6 |
 | bro-acp pair (protocol + consumer) | **planned** | APIDRIFT-8 ∥ APIDRIFT-9, first customer |
 
 ## Active work
 
-_APIDRIFT-4 landed and pushed (`4d9841f`). Next: APIDRIFT-5 (see TASKS.md for
-the full 5→6→8+9→7→10→11 order)._
+_None — APIDRIFT-5 landed and pushed. Next: APIDRIFT-6._
 
 ## Blockers
 
@@ -31,17 +30,18 @@ the full 5→6→8+9→7→10→11 order)._
 
 | Metric | Value |
 |--------|-------|
-| Unit tests (core) | 21 + 1 doctest |
-| Unit tests (`--features producer`) | 25 + 1 demo + 1 doctest |
+| Unit tests (core) | 25 + 1 doctest |
+| Unit tests (`--features serde`) | 29 + 1 doctest |
+| Unit tests (`--features producer`) | 34 + 1 demo + 1 doctest |
+| Unit tests (`--features serde,producer`) | 34 + 1 demo + 1 doctest |
 | Test pass rate | 100% |
-| Warnings | 0 (clippy `-D warnings` clean ± feature) |
+| Warnings | 0 (clippy `-D warnings` clean on all four combos) |
 
 ## Next (ranked)
 
-1. APIDRIFT-5 — action enum + attrs + serde + snapshot v1
-2. APIDRIFT-6 — Surface + ledger crate + dogfood
-3. APIDRIFT-8 + APIDRIFT-9 — bro-tui / bro-desktop pair (the demo)
-4. APIDRIFT-7 — rust-public surface + arniko ledger demo
-5. APIDRIFT-10 → APIDRIFT-11 — CLI → registry/gate
+1. APIDRIFT-6 — Surface + ledger crate + dogfood
+2. APIDRIFT-8 + APIDRIFT-9 — bro-tui / bro-desktop pair (the demo)
+3. APIDRIFT-7 — rust-public surface + arniko ledger demo
+4. APIDRIFT-10 → APIDRIFT-11 — CLI → registry/gate
 
 

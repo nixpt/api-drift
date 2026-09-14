@@ -138,11 +138,40 @@ fn parse_doc(root: &Value, version: &str) -> Result<ApiSnapshot, ProducerError> 
             path: path.clone(),
             kind,
             sig: compact(payload),
+            attrs: collect_attrs(node),
         });
     }
 
     items.sort_by(|a, b| a.path.cmp(&b.path));
     Ok(ApiSnapshot::new(version, items))
+}
+
+/// Attribute markers for one index node: `deprecated` when `deprecation` is
+/// non-null, `non_exhaustive` when the attrs list mentions it (covers both
+/// the string and object encodings rustdoc has used). Unknown attrs ignored —
+/// `Item.attrs` records presence of the markers `classify` reads, not full
+/// syntax.
+fn collect_attrs(node: &Value) -> Vec<String> {
+    let mut out = Vec::new();
+    if node.get("deprecation").is_some_and(|d| !d.is_null()) {
+        out.push("deprecated".to_owned());
+    }
+    if let Some(attrs) = node.get("attrs").and_then(Value::as_array) {
+        for a in attrs {
+            let text = match a {
+                Value::String(s) => s.clone(),
+                Value::Object(m) => m.keys().next().cloned().unwrap_or_default(),
+                _ => String::new(),
+            };
+            if text.contains("non_exhaustive") && !out.contains(&"non_exhaustive".to_owned()) {
+                out.push("non_exhaustive".to_owned());
+            }
+            if text.contains("deprecated") && !out.contains(&"deprecated".to_owned()) {
+                out.push("deprecated".to_owned());
+            }
+        }
+    }
+    out
 }
 
 /// Compact JSON rendering of a rustdoc `inner` payload (the sig).
@@ -249,5 +278,34 @@ mod tests {
             snapshot_from_rustdoc_json(std::path::Path::new("/nonexistent/x.json"), "v")
                 .unwrap_err();
         assert!(matches!(err, ProducerError::Io(_)));
+    }
+
+    #[test]
+    fn attrs_flow_from_nodes() {
+        let doc = serde_json::json!({
+            "index": {
+                "1": {"visibility": "public",
+                      "deprecation": {"note": "use b instead"},
+                      "inner": {"function": {"sig": "fn a()"}}},
+                "2": {"visibility": "public",
+                      "attrs": ["non_exhaustive"],
+                      "inner": {"struct": {}}},
+            },
+            "paths": {
+                "1": {"crate_id": 0, "path": ["demo", "a"]},
+                "2": {"crate_id": 0, "path": ["demo", "T"]},
+            }
+        })
+        .to_string();
+        let s = snapshot_from_rustdoc_str(&doc, "v").unwrap();
+        assert!(s.get("demo::a").unwrap().has_attr("deprecated"));
+        assert!(s.get("demo::T").unwrap().has_attr("non_exhaustive"));
+        // And they move severity: deprecated removal still breaks but says so.
+        let d = crate::diff::diff_snapshots(
+            &s,
+            &crate::snapshot::ApiSnapshot::new("v2", vec![]),
+        );
+        let breaks = crate::classify::classify_diff(&d);
+        assert!(breaks.iter().any(|b| b.note.contains("deprecated")));
     }
 }
