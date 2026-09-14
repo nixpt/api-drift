@@ -17,6 +17,7 @@ _None — APIDRIFT-5 just landed._
 | [APIDRIFT-7](./tickets/APIDRIFT-7-rust-public-surface.md) | rust-public surface, arniko ledger demo | after 6 |
 | [APIDRIFT-10](./tickets/APIDRIFT-10-cli.md) | CLI: check/note/affected/release-hint | after 9 |
 | [APIDRIFT-11](./tickets/APIDRIFT-11-registry-gate.md) | registry + merge-gate hook | after 9 |
+| [APIDRIFT-12](./tickets/APIDRIFT-12-evorium-borrows.md) | Evorium borrows: antibodies, guard, relatedness | woven into 6/9/11 |
 | [APIDRIFT-3](./tickets/APIDRIFT-3-applier.md) | call-site applier / codemod | after 5, 9 |
 
 ## Done

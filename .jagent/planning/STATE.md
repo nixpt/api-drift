@@ -16,6 +16,7 @@
 | embedded-ledger design | **proposed** | docs/DESIGN-embedded-ledger.md (captain+foreman review) |
 | Surface + ledger crate + dogfood | **next** | APIDRIFT-6 |
 | bro-acp pair (protocol + consumer) | **planned** | APIDRIFT-8 ∥ APIDRIFT-9, first customer |
+| Evorium borrows (antibodies/guard/relatedness) | **backlog** | APIDRIFT-12, woven into 6/9/11 |
 
 ## Active work
 

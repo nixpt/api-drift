@@ -33,6 +33,24 @@ live against format v61 (55 public items). `tests/arniko_demo.rs` end-to-end.
 ### 📂 Files Modified
 - `src/producer.rs`, `tests/arniko_demo.rs`, `Cargo.toml` (feature + dev-deps)
 
+## [2026-09-14] - APIDRIFT-12 Evorium borrow survey 📋
+
+### 📝 Summary
+Audited `projects/evorium` for mechanisms the embedded ledger can borrow.
+Filed APIDRIFT-12 (woven into 6/9/11, no code lift — OCPL-1.1 vs MIT/Apache)
++ added a "Prior art within the fleet" section to the design doc: antibody
+ledger notes w/ corroboration, autoimmune_guard for auto-apply, TreeOfCode
+relatedness for gate ranking, structural-similarity rename metric (evaluate),
+signed did:key notes (deferred), canopy workflow naming.
+
+### 📂 Files Modified
+- `docs/DESIGN-embedded-ledger.md` (new section)
+- `.jagent/planning/tickets/APIDRIFT-12-evorium-borrows.md` (new)
+- `.jagent/planning/{STATE,TASKS}.md`
+
+### 🔗 References
+- `projects/evorium/crates/{evorium-immune,evorium-genome,evorium-forge}`
+
 ## [2026-09-14] - APIDRIFT-5 action enum + serde + snapshot v1 ✅
 
 ### 📝 Summary

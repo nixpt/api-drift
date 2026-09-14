@@ -195,6 +195,25 @@ These are prerequisites, not nice-to-haves: the ledger will auto-apply what
   changed in a machine-readable contract. They link: a ledger entry's `ref`
   points at a ticket, a dejavue decision can cite a ledger hash.
 
+## Prior art within the fleet: Evorium (borrowed vocabulary, 2026-09-14)
+
+`projects/evorium` (OpenKO) models software evolution as a living system —
+genome/capsule/habitat/canopy/forge/immune. Several of its concrete mechanisms
+map almost one-to-one onto the embedded ledger; filed as APIDRIFT-12:
+
+| Evorium piece | Where | Borrow |
+|---|---|---|
+| `immune::Antibody` + `ImmuneMemory::record/merge/consult` | ledger notes + APIDRIFT-9 `check!` | The migration note **is** an antibody: the first consumer that breaks records detection + patch guidance, every other consumer gets immunity pre-merge via `check!`. Add `corroboration: u32` to ledger notes (rises when multiple consumers confirm the same break). |
+| `immune::autoimmune_guard(proposed, confidence)` | APIDRIFT-4 conservative core | Already the *shape* of our `auto_appliable` gate (weak-signal rename can never auto-apply). Formalize: `Suggestion` gains a `confidence: f64` and the ledger's auto-applier consults an `autoimmune_guard` before applying anything above Tolerate. |
+| `genome::TreeOfCode::relatives` (Jaccard over ancestor sets ≥ 0.5) | APIDRIFT-11 registry/gate | "Who shares enough ancestry to develop the same disease?" = which downstream repos consume a drifted surface. Gate output ranks affected repos by relatedness, not just by list order. |
+| `genome::Anatomy::structural_similarity` (cosine over counts) | rename detection | Candidate additional/alternative weak-signal metric for same-kind rename pairs (current: sig edit distance ≤ 8). Compare against the Levenshtein path before switching. |
+| `forge::PatchArtifact` (signed, `did:key`, trust score, channels) | ledger entries | Ledger notes can graduate to **signed artifacts** with a `did:key` identity (interop with XIP DIDs) + peer corroboration; `--min-trust` for auto-apply. Start unsigned + advisory (immune's own caveat: unsigned antibodies are advisory), graduate when peer sync exists. |
+| `forge::ManifestDelta::compute(from, to)` | snapshot diffing | Same diff-of-manifests shape; their *signed delta artifact* pattern maps to delta snapshots between pins — revisit if delta snapshots beat full-snapshot files. |
+| `canopy` snapshot → plan → transition → verify → commit/restore | ledger workflow | The ledger-record cycle should mirror it: diff (plan) → verify → append entry (commit); a bad entry restores by appending a correction, never rewriting history (append-only jsonl already enforces this). |
+
+Privacy invariant shared and adopted: observations/ledger entries carry only
+failure patterns (paths, sigs, hashes) — never user data.
+
 ## Non-goals
 
 - Auto-landing patches without review (unchanged from the roadmap).
