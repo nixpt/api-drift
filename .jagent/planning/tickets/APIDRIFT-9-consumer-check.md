@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | blocked — bro-cli actively changing (BRO-98 PR2 + BRO-113 in flight) |
+| **Status** | ready — BRO-98 (PR1 #84 + PR2 #85) and BRO-113 (#81) all merged to dev 2026-09-15 |
 | **Milestone** | M2 |
 | **Size** | M |
 | **Owner** | unassigned |
@@ -20,11 +20,15 @@ downstream actually uses, scoped to call sites.
 consumer's own source (use paths, method calls, enum patterns) →
 call-site-scoped suggestions. Embed in bro-desktop against bro-tui's ledger.
 
-## Blocked
+## Unblocked (2026-09-15)
 
-Held 2026-09-15: bro-cli is being actively worked (BRO-98 PR2 merged,
-BRO-113 in flight). Proceed only when bro-cli settles and after APIDRIFT-8's
-bro-tui embed lands; coordinate with the BRO-98 horse.
+BRO-98 fully merged to dev (PR1 #84 ~03:43, PR2 #85 ~07:25). BRO-113 (#81)
+merged to dev ~09:12. `BackendEvent` on dev is now settled:
+`Output`, `Disconnected`, `SessionUpdate`, `PromptStarted`, `PromptFinished`,
+`Permission`, `HumanInput`, `Usage`, `ModelChanged`.
+
+Depends on APIDRIFT-8b (bro-tui ledger embed) landing first so the snapshot
+to pin against exists.
 
 ## Scope
 
