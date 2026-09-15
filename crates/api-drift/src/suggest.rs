@@ -265,6 +265,20 @@ fn split_variant(path: &str) -> (&str, &str) {
 /// same sig modulo the last path segment, or sig edit distance ≤ 8. Returns
 /// (from, to, confident) triples; unconfident same-kind pairs surface as
 /// `review-rename` (not auto) via [`rename_review_for`].
+///
+/// **Metric decision (APIDRIFT-12):** cosine-over-word-counts
+/// (`genome::Anatomy::structural_similarity`) was evaluated against this
+/// two-tier approach. No meaningful recall gain was found:
+/// — `sigs_match_modulo_rename` already covers every pure-rename case
+///   regardless of sig length, making cosine redundant for the common path.
+/// — `edit_distance ≤ 8` covers the remaining short-sig co-change cases
+///   (minor type widenings, parameter renames alongside the item rename).
+/// — The only gap: a name change paired with a large sig co-change
+///   (edit distance > 8). Cosine would fold these as `review-rename`; the
+///   current code leaves them as two separate items. That gap is intentional —
+///   a significant sig change alongside a rename must surface independently so
+///   callers can update both the name *and* the call signature. Folding hides
+///   the delta. Cosine rejected; conservative two-tier approach retained.
 fn detect_renames(breaks: &[ClassifiedBreak]) -> Vec<(String, String, bool)> {
     let removed: Vec<&ClassifiedBreak> = breaks
         .iter()
@@ -647,6 +661,77 @@ mod tests {
             ),
             "unexpected: {:?}",
             out[0].action
+        );
+    }
+
+    // APIDRIFT-12 similarity-metric evaluation tests
+    // These pin the decision to reject cosine-over-word-counts in favour of
+    // the two-tier approach (sigs_match_modulo_rename + edit_distance ≤ 8).
+
+    #[test]
+    fn long_sig_pure_rename_is_confident_without_cosine() {
+        // sigs_match_modulo_rename handles long sigs for free via string
+        // replacement of the leaf segment. Cosine adds nothing here.
+        let breaks = vec![
+            brk_sig(
+                "m::old_process",
+                BreakKind::Removed,
+                ItemKind::Function,
+                "pub fn old_process(items: &[Item], opts: ProcessOpts) -> Vec<Result<(), BatchError>>",
+                "",
+            ),
+            brk_sig(
+                "m::new_process",
+                BreakKind::Added,
+                ItemKind::Function,
+                "",
+                "pub fn new_process(items: &[Item], opts: ProcessOpts) -> Vec<Result<(), BatchError>>",
+            ),
+        ];
+        let out = suggest_for_breaks(&breaks);
+        assert_eq!(out.len(), 1);
+        assert!(
+            matches!(out[0].action, SuggestionAction::RenameCall { .. }),
+            "long pure-rename must fold confidently: {:?}",
+            out[0].action
+        );
+        assert!(out[0].auto_appliable);
+        assert!((out[0].confidence - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn rename_plus_large_sig_change_stays_separate() {
+        // Name change + sig co-change with edit_dist > 8: deliberately left as
+        // two items. Cosine would fold these as review-rename, but that hides
+        // the sig delta callers must also address. Conservative is correct.
+        let breaks = vec![
+            brk_sig(
+                "m::old_process",
+                BreakKind::Removed,
+                ItemKind::Function,
+                "pub fn old_process(x: &str, opts: ProcessOpts) -> Vec<Result<(), BatchError>>",
+                "",
+            ),
+            brk_sig(
+                "m::new_process",
+                BreakKind::Added,
+                ItemKind::Function,
+                "",
+                "pub fn new_process(x: &HashMap<String, Vec<u8>>, opts: ProcessOpts) -> Vec<Result<(), BatchError>>",
+            ),
+        ];
+        let out = suggest_for_breaks(&breaks);
+        assert_eq!(
+            out.len(),
+            2,
+            "rename + large sig change must stay as two items"
+        );
+        assert!(
+            out.iter().all(|s| !matches!(
+                s.action,
+                SuggestionAction::RenameCall { .. } | SuggestionAction::ReviewRename { .. }
+            )),
+            "neither item should be folded: {out:?}"
         );
     }
 

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | in_progress — antibodies (6) + guard done; relatedness + similarity remain |
+| **Status** | in_progress — similarity metric evaluated + rejected (documented); relatedness ranking gated on APIDRIFT-11 |
 | **Milestone** | M2 |
 | **Size** | S–M (spread across 6/9/11) |
 | **Owner** | unassigned |
@@ -53,7 +53,7 @@ the fleet: Evorium":
 - [x] Auto-applier consults a confidence guard — `Suggestion.confidence: f64`
       + `autoimmune_guard` landed in core (15)
 - [ ] Gate output ranks repos by relatedness (landed with 11)
-- [ ] Similarity-metric comparison documented (adopt or reject with reason)
+- [x] Similarity-metric comparison documented (cosine-over-word-counts rejected; reason in `detect_renames` doc comment + two regression tests)
 
 ## Notes
 
