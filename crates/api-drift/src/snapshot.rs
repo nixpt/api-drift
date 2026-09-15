@@ -20,6 +20,11 @@ pub enum ItemKind {
     Const,
     Static,
     Module,
+    /// A non-code data record — one row of a catalog/table surface (e.g. a
+    /// checkstand product row). `classify` treats a changed row's signature
+    /// as a Warning (a re-price is semantic drift, not a build break) and a
+    /// removed row as Breaking (a pending reference can't resolve).
+    Row,
     /// Anything else (type alias, macro…). Kept so producers never have to drop an item.
     Other,
 }

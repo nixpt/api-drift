@@ -89,6 +89,20 @@ Added, re-price = SignatureChanged (Warning), delist = Removed (Breaking),
 `attrs=["deprecated"]` for delist-soon. Filed APIDRIFT-14 (needs `ItemKind::
 Row` + `CatalogSurface`).
 
+## [2026-09-14] - APIDRIFT-14 data/catalog surface ✅
+
+### 📝 Summary
+Landed `ItemKind::Row` + `CatalogSurface` + `catalog_surface!`: data catalogs
+(checkstand products) flow through the identical pipeline. New row = Added/
+Compatible, re-price = SignatureChanged/Warning, delist = Removed/Breaking,
+`attrs=["deprecated"]` for delist-soon — all falling out of existing
+classify arms (no classify change needed).
+
+### 📂 Files Modified
+- `crates/api-drift/src/{snapshot.rs, surface.rs, lib.rs}`
+- planning tree
+
+
 
 ## [2026-09-14] - APIDRIFT-12 Evorium borrow survey 📋
 

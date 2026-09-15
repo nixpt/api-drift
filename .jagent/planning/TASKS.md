@@ -17,7 +17,6 @@ _None — APIDRIFT-6 just landed._
 | [APIDRIFT-11](./tickets/APIDRIFT-11-registry-gate.md) | registry + merge-gate hook | after 9 |
 | [APIDRIFT-12](./tickets/APIDRIFT-12-evorium-borrows.md) | Evorium borrows (antibodies done in 6; guard/relatedness remain) | woven into 9/11 |
 | [APIDRIFT-13](./tickets/APIDRIFT-13-checkstand-breadboard.md) | checkstand borrows (real-server bar, schemars sig) + breadboard | woven into 8/9/6 |
-| [APIDRIFT-14](./tickets/APIDRIFT-14-catalog-surface.md) | data/catalog surface (checkstand products) | after 6 |
 | [APIDRIFT-3](./tickets/APIDRIFT-3-applier.md) | call-site applier / codemod | after 5, 9 |
 
 ## Done
@@ -29,6 +28,7 @@ _None — APIDRIFT-6 just landed._
 | [APIDRIFT-4](./tickets/APIDRIFT-4-core-correctness.md) | core correctness (review prerequisites) | 2026-09-14 |
 | [APIDRIFT-5](./tickets/APIDRIFT-5-action-enum-serde.md) | action enum + attrs + serde + snapshot v1 | 2026-09-14 |
 | [APIDRIFT-6](./tickets/APIDRIFT-6-surface-ledger.md) | Surface trait + ledger crate + dogfood | 2026-09-14 |
+| [APIDRIFT-14](./tickets/APIDRIFT-14-catalog-surface.md) | data/catalog surface (ItemKind::Row + CatalogSurface) | 2026-09-14 |
 
 
 

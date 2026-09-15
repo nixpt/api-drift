@@ -111,3 +111,170 @@ macro_rules! enum_surface {
         )
     };
 }
+
+/// A [`Surface`] over rows of a data catalog — the checkstand product-catalog
+/// case. Each row becomes an [`ItemKind::Row`] item; `path` is a stable key
+/// (e.g. `products::widget`), `sig` is the canonical row rendering (name +
+/// price + threshold, or whatever the row's contract is).
+///
+/// Classification falls out of the existing rules untouched: a new row is
+/// `Added` (Compatible), a changed row is `SignatureChanged` (Warning — a
+/// re-price is semantic drift, not a build break), a removed row is
+/// `Removed` (Breaking, for any pending reference), and `attrs =
+/// ["deprecated"]` marks delist-soon.
+#[derive(Debug, Clone, Default)]
+pub struct CatalogSurface {
+    surface_name: &'static str,
+    rows: Vec<Item>,
+}
+
+impl CatalogSurface {
+    /// Build from rows: `(path, sig, attrs)`. Empty `attrs` allowed.
+    pub fn new(surface_name: &'static str, rows: &[(&str, &str, &[&str])]) -> Self {
+        Self {
+            surface_name,
+            rows: rows
+                .iter()
+                .map(|(path, sig, attrs)| Item::new(path, ItemKind::Row, sig).with_attrs(attrs))
+                .collect(),
+        }
+    }
+}
+
+impl Surface for CatalogSurface {
+    fn name(&self) -> &str {
+        self.surface_name
+    }
+
+    fn snapshot(&self) -> ApiSnapshot {
+        ApiSnapshot::new(self.surface_name, self.rows.clone())
+    }
+}
+
+/// List one data catalog's rows as a ledger [`Surface`].
+///
+/// ```ignore
+/// catalog_surface!("catalog",
+///     ["products::widget": "Widget 500 0.10", "products::gadget": "Gadget 1200 0.05"]);
+/// ```
+#[macro_export]
+macro_rules! catalog_surface {
+    ($name:literal, [ $($key:literal : $sig:literal),* $(,)? ]) => {
+        $crate::surface::CatalogSurface::new(
+            $name,
+            &[$( ($key, $sig, &[] as &[&str]) ),*],
+        )
+    };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::classify::{classify_diff, BreakKind, Severity};
+    use crate::diff::diff_snapshots;
+
+    fn cat() -> CatalogSurface {
+        CatalogSurface::new(
+            "catalog",
+            &[
+                ("products::widget", "Widget 500 0.10", &[]),
+                ("products::gadget", "Gadget 1200 0.05", &[]),
+            ],
+        )
+    }
+
+    #[test]
+    fn catalog_rows_are_row_items_with_attrs() {
+        let s = cat().snapshot();
+        assert_eq!(s.len(), 2);
+        let w = s.get("products::widget").unwrap();
+        assert_eq!(w.kind, ItemKind::Row);
+        assert_eq!(w.sig, "Widget 500 0.10");
+
+        let deprecated = CatalogSurface::new(
+            "catalog",
+            &[("products::old", "Old 100 0.0", &["deprecated"])],
+        )
+        .snapshot();
+        assert!(deprecated
+            .get("products::old")
+            .unwrap()
+            .has_attr("deprecated"));
+    }
+
+    #[test]
+    fn new_row_is_compatible_added() {
+        let old = cat().snapshot();
+        let new = CatalogSurface::new(
+            "catalog",
+            &[
+                ("products::widget", "Widget 500 0.10", &[]),
+                ("products::gadget", "Gadget 1200 0.05", &[]),
+                ("products::sprocket", "Sprocket 700 0.02", &[]),
+            ],
+        )
+        .snapshot();
+        let breaks = classify_diff(&diff_snapshots(&old, &new));
+        let b = breaks
+            .iter()
+            .find(|b| b.path == "products::sprocket")
+            .unwrap();
+        assert_eq!(b.kind, BreakKind::Added);
+        assert_eq!(b.severity, Severity::Compatible);
+    }
+
+    #[test]
+    fn reprice_is_signature_changed_warning() {
+        let old = cat().snapshot();
+        let new = CatalogSurface::new(
+            "catalog",
+            &[
+                ("products::widget", "Widget 650 0.10", &[]), // repriced
+                ("products::gadget", "Gadget 1200 0.05", &[]),
+            ],
+        )
+        .snapshot();
+        let breaks = classify_diff(&diff_snapshots(&old, &new));
+        let b = breaks
+            .iter()
+            .find(|b| b.path == "products::widget")
+            .unwrap();
+        assert_eq!(b.kind, BreakKind::SignatureChanged);
+        assert_eq!(b.severity, Severity::Warning); // semantic drift, not a build break
+    }
+
+    #[test]
+    fn delist_is_removed_breaking() {
+        let old = cat().snapshot();
+        let new = CatalogSurface::new("catalog", &[("products::widget", "Widget 500 0.10", &[])])
+            .snapshot();
+        let breaks = classify_diff(&diff_snapshots(&old, &new));
+        let b = breaks
+            .iter()
+            .find(|b| b.path == "products::gadget")
+            .unwrap();
+        assert_eq!(b.kind, BreakKind::Removed);
+        assert_eq!(b.severity, Severity::Breaking); // pending refs can't resolve
+    }
+
+    #[test]
+    fn catalog_surface_macro_builds() {
+        let s = catalog_surface!(
+            "catalog",
+            ["products::a": "A 100 0.0", "products::b": "B 200 0.0"]
+        )
+        .snapshot();
+        assert_eq!(s.len(), 2);
+        assert_eq!(s.get("products::a").unwrap().kind, ItemKind::Row);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn catalog_surface_roundtrips_through_snapshot_file() {
+        let file = crate::snapshot_file::render_snapshot_file("catalog", &cat().snapshot());
+        let text = crate::snapshot_file::to_string_pretty(&file).unwrap();
+        let back = crate::snapshot_file::parse_snapshot_file(&text).unwrap();
+        assert_eq!(back.items, file.items);
+        assert_eq!(back.items[0].kind, ItemKind::Row);
+    }
+}

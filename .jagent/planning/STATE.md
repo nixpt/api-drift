@@ -18,7 +18,7 @@
 | bro-acp pair (protocol + consumer) | **next** | APIDRIFT-8 ∥ APIDRIFT-9, first customer |
 | Evorium borrows (antibodies/guard/relatedness) | **in progress** | APIDRIFT-12: antibodies+corroboration in 6; guard+relatedness in 9/11 |
 | checkstand borrows + breadboard | **backlog** | APIDRIFT-13: real-server bar + schemars sig → 8/9/6 |
-| data/catalog surface | **backlog** | APIDRIFT-14: checkstand products as a surface |
+| data/catalog surface | **shipped** | APIDRIFT-14: ItemKind::Row + CatalogSurface |
 
 ## Active work
 

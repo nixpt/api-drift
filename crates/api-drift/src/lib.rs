@@ -52,4 +52,4 @@ pub use snapshot_file::{
     SnapshotFileError,
 };
 pub use suggest::{Suggestion, SuggestionAction};
-pub use surface::{EnumSurface, Surface};
+pub use surface::{CatalogSurface, EnumSurface, Surface};
