@@ -22,19 +22,22 @@
 
 ## Active work
 
-_None — APIDRIFT-6 landed (workspace conversion + api-drift-ledger). Next:
-APIDRIFT-8 ∥ APIDRIFT-9 (bro-acp pair)._
+_APIDRIFT-8a — api-drift-side protocol surface (`ProtocolSurface` +
+`schema_hash`). APIDRIFT-8b (bro-tui embed) and APIDRIFT-9 held: bro-cli is
+being actively worked (BRO-98 PR2 merged, BRO-113 in flight) — read-only
+against it until it settles._
 
 ## Blockers
 
-_None (upstream scrubbed the stale `/build` blocker; builds run in `/tmp`)._
+- bro-cli in flux → APIDRIFT-8b + APIDRIFT-9 gated; coordinate with the
+  BRO-98 horse.
 
 ## Metrics
 
 | Metric | Value |
 |--------|-------|
-| Unit tests (core lib, no features) | 29 + 1 doctest |
-| Unit tests (`--workspace --all-features`) | 34 + 4 ledger + 1 dogfood + 1 demo + 1 doctest |
+| Unit tests (core lib, no features) | 35 + 1 doctest |
+| Unit tests (`--workspace --all-features`) | 45 + 4 ledger + 1 dogfood + 1 demo + 1 doctest |
 | Test pass rate | 100% |
 | Warnings | 0 (clippy `-D warnings`, rustdoc `-D warnings`, `cargo fmt --check` clean) |
 

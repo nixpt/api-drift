@@ -2,11 +2,15 @@
 
 ## In progress
 
-_None — APIDRIFT-6 just landed._
+| ID | Task | Notes |
+|----|------|-------|
+| [APIDRIFT-8](./tickets/APIDRIFT-8-protocol-surface.md) | protocol surface — 8a api-drift-side (ProtocolSurface + schema_hash) | 8b bro-tui embed gated on bro-cli settling |
 
-## Ready
+## Blocked
 
-- [APIDRIFT-8](./tickets/APIDRIFT-8-protocol-surface.md) · [APIDRIFT-9](./tickets/APIDRIFT-9-consumer-check.md) — bro-acp pair (parallel) | M2 |
+| ID | Task | Reason |
+|----|------|--------|
+| [APIDRIFT-9](./tickets/APIDRIFT-9-consumer-check.md) | consumer pins + check! + usage scan, bro-desktop | bro-cli actively changing (BRO-98 PR2 + BRO-113); wait for it to settle |
 
 ## Backlog
 
@@ -16,7 +20,7 @@ _None — APIDRIFT-6 just landed._
 | [APIDRIFT-10](./tickets/APIDRIFT-10-cli.md) | CLI: check/note/affected/release-hint | after 9 |
 | [APIDRIFT-11](./tickets/APIDRIFT-11-registry-gate.md) | registry + merge-gate hook | after 9 |
 | [APIDRIFT-12](./tickets/APIDRIFT-12-evorium-borrows.md) | Evorium borrows (antibodies done in 6; guard/relatedness remain) | woven into 9/11 |
-| [APIDRIFT-13](./tickets/APIDRIFT-13-checkstand-breadboard.md) | checkstand borrows (real-server bar, schemars sig) + breadboard | woven into 8/9/6 |
+| [APIDRIFT-13](./tickets/APIDRIFT-13-checkstand-breadboard.md) | checkstand borrows (real-server bar, schemars sig) + breadboard | schemars sig → 8a |
 | [APIDRIFT-3](./tickets/APIDRIFT-3-applier.md) | call-site applier / codemod | after 5, 9 |
 
 ## Done

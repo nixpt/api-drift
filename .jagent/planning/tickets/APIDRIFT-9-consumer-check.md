@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | backlog |
+| **Status** | blocked — bro-cli actively changing (BRO-98 PR2 + BRO-113 in flight) |
 | **Milestone** | M2 |
 | **Size** | M |
 | **Owner** | unassigned |
 | **Created** | 2026-09-14 |
-| **Updated** | 2026-09-14 |
+| **Updated** | 2026-09-15 |
 
 ## Problem
 
@@ -19,6 +19,12 @@ downstream actually uses, scoped to call sites.
 `api-drift.toml` upstream pins, `check!` test, `syn` usage scan of the
 consumer's own source (use paths, method calls, enum patterns) →
 call-site-scoped suggestions. Embed in bro-desktop against bro-tui's ledger.
+
+## Blocked
+
+Held 2026-09-15: bro-cli is being actively worked (BRO-98 PR2 merged,
+BRO-113 in flight). Proceed only when bro-cli settles and after APIDRIFT-8's
+bro-tui embed lands; coordinate with the BRO-98 horse.
 
 ## Scope
 
@@ -33,5 +39,5 @@ call-site-scoped suggestions. Embed in bro-desktop against bro-tui's ledger.
 
 ## Notes
 
-Design doc § "The consumer check, concretely". Depends on APIDRIFT-6.
-Pairs with APIDRIFT-8.
+Design doc § "The consumer check, concretely". Depends on APIDRIFT-6 +
+APIDRIFT-8. Pairs with APIDRIFT-8.

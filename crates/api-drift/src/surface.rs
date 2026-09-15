@@ -167,6 +167,60 @@ macro_rules! catalog_surface {
     };
 }
 
+/// A [`Surface`] over a protocol's methods — ACP/MCP tool calls. Each method
+/// becomes an [`ItemKind::Method`] item; `path` is the wire method name
+/// (e.g. `bro.checkout`, `_bro/extension`), `sig` is the request/response
+/// schema hash the producer computed (`crate::schema_hash`), so a schema
+/// change flips the sig and `classify` flags it `SignatureChanged`.
+///
+/// Classification uses the existing `Method` arm: a schema change is
+/// `Breaking` (a request/response contract move breaks every caller), an
+/// added method is `Compatible`, a removed method is `Breaking`.
+#[derive(Debug, Clone, Default)]
+pub struct ProtocolSurface {
+    surface_name: &'static str,
+    methods: Vec<Item>,
+}
+
+impl ProtocolSurface {
+    /// Build from methods: `(wire_name, schema_hash_sig)`.
+    pub fn new(surface_name: &'static str, methods: &[(&str, &str)]) -> Self {
+        Self {
+            surface_name,
+            methods: methods
+                .iter()
+                .map(|(name, sig)| Item::new(name, ItemKind::Method, sig))
+                .collect(),
+        }
+    }
+}
+
+impl Surface for ProtocolSurface {
+    fn name(&self) -> &str {
+        self.surface_name
+    }
+
+    fn snapshot(&self) -> ApiSnapshot {
+        ApiSnapshot::new(self.surface_name, self.methods.clone())
+    }
+}
+
+/// List one protocol's methods as a ledger [`Surface`].
+///
+/// ```ignore
+/// protocol_surface!("acp-contract",
+///     ["bro.checkout": "sha256:…", "_bro/extension": "sha256:…"]);
+/// ```
+#[macro_export]
+macro_rules! protocol_surface {
+    ($name:literal, [ $($method:literal : $sig:literal),* $(,)? ]) => {
+        $crate::surface::ProtocolSurface::new(
+            $name,
+            &[$( ($method, $sig) ),*],
+        )
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -276,5 +330,70 @@ mod tests {
         let back = crate::snapshot_file::parse_snapshot_file(&text).unwrap();
         assert_eq!(back.items, file.items);
         assert_eq!(back.items[0].kind, ItemKind::Row);
+    }
+
+    fn proto() -> ProtocolSurface {
+        ProtocolSurface::new(
+            "acp-contract",
+            &[
+                ("bro.checkout", "sha256:aaaa"),
+                ("bro.refund", "sha256:bbbb"),
+            ],
+        )
+    }
+
+    #[test]
+    fn protocol_methods_are_method_items() {
+        let s = proto().snapshot();
+        assert_eq!(s.len(), 2);
+        let c = s.get("bro.checkout").unwrap();
+        assert_eq!(c.kind, ItemKind::Method);
+        assert_eq!(c.sig, "sha256:aaaa");
+    }
+
+    #[test]
+    fn protocol_schema_change_is_breaking() {
+        let old = proto().snapshot();
+        let new = ProtocolSurface::new(
+            "acp-contract",
+            &[
+                ("bro.checkout", "sha256:changed"),
+                ("bro.refund", "sha256:bbbb"),
+            ],
+        )
+        .snapshot();
+        let breaks = classify_diff(&diff_snapshots(&old, &new));
+        let b = breaks.iter().find(|b| b.path == "bro.checkout").unwrap();
+        assert_eq!(b.kind, BreakKind::SignatureChanged);
+        assert_eq!(b.severity, Severity::Breaking); // a schema move breaks every caller
+    }
+
+    #[test]
+    fn protocol_added_method_is_compatible() {
+        let old = proto().snapshot();
+        let new = ProtocolSurface::new(
+            "acp-contract",
+            &[
+                ("bro.checkout", "sha256:aaaa"),
+                ("bro.refund", "sha256:bbbb"),
+                ("bro.void", "sha256:cccc"),
+            ],
+        )
+        .snapshot();
+        let breaks = classify_diff(&diff_snapshots(&old, &new));
+        let b = breaks.iter().find(|b| b.path == "bro.void").unwrap();
+        assert_eq!(b.kind, BreakKind::Added);
+        assert_eq!(b.severity, Severity::Compatible);
+    }
+
+    #[test]
+    fn protocol_surface_macro_builds() {
+        let s = protocol_surface!(
+            "acp-contract",
+            ["bro.checkout": "sha256:aaaa", "_bro/extension": "sha256:bbbb"]
+        )
+        .snapshot();
+        assert_eq!(s.len(), 2);
+        assert_eq!(s.get("_bro/extension").unwrap().kind, ItemKind::Method);
     }
 }

@@ -114,6 +114,19 @@ pub fn render_snapshot_file(surface: &str, snap: &ApiSnapshot) -> SnapshotFile {
     }
 }
 
+/// sha256 over a canonical schema (or any contract text) — the sig a
+/// [`ProtocolSurface`](crate::surface::ProtocolSurface) uses for a
+/// request/response schema. Caller must canonicalize first (stable key
+/// order + formatting): two logically-identical schemas with different
+/// formatting hash differently, on purpose — drift should be visible.
+pub fn schema_hash(text: &str) -> String {
+    use sha2::{Digest, Sha256};
+
+    let mut h = Sha256::new();
+    h.update(text.as_bytes());
+    format!("sha256:{}", hex::encode(h.finalize()))
+}
+
 /// Serialize the envelope to pretty JSON (the committed file bytes).
 pub fn to_string_pretty(file: &SnapshotFile) -> Result<String, SnapshotFileError> {
     Ok(serde_json::to_string_pretty(file)?)
@@ -202,5 +215,15 @@ mod tests {
             ],
         );
         assert_eq!(content_hash(&a.items), content_hash(&b.items));
+    }
+
+    #[test]
+    fn schema_hash_is_stable_and_responsive() {
+        let a = schema_hash(r#"{"type":"object","properties":{"id":{"type":"string"}}}"#);
+        let b = schema_hash(r#"{"type":"object","properties":{"id":{"type":"string"}}}"#);
+        let c = schema_hash(r#"{"type":"object","properties":{"id":{"type":"integer"}}}"#);
+        assert_eq!(a, b);
+        assert_ne!(a, c);
+        assert!(a.starts_with("sha256:"));
     }
 }

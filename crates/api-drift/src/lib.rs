@@ -48,8 +48,8 @@ pub use diff::ApiDiff;
 pub use snapshot::{ApiSnapshot, Item, ItemKind};
 #[cfg(feature = "serde")]
 pub use snapshot_file::{
-    content_hash, parse_snapshot_file, render_snapshot_file, to_string_pretty, SnapshotFile,
-    SnapshotFileError,
+    content_hash, parse_snapshot_file, render_snapshot_file, schema_hash, to_string_pretty,
+    SnapshotFile, SnapshotFileError,
 };
 pub use suggest::{Suggestion, SuggestionAction};
-pub use surface::{CatalogSurface, EnumSurface, Surface};
+pub use surface::{CatalogSurface, EnumSurface, ProtocolSurface, Surface};

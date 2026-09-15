@@ -89,6 +89,24 @@ Added, re-price = SignatureChanged (Warning), delist = Removed (Breaking),
 `attrs=["deprecated"]` for delist-soon. Filed APIDRIFT-14 (needs `ItemKind::
 Row` + `CatalogSurface`).
 
+## [2026-09-15] - APIDRIFT-8a protocol surface ✅ (+ APIDRIFT-9 held)
+
+### 📝 Summary
+Per direction, sequenced 8 before 9 and held 9: bro-cli is being actively
+worked (BRO-98 PR2 merged, BRO-113 in flight) — read-only against it. Built
+the unblocked api-drift half of APIDRIFT-8: `ProtocolSurface` (ACP/MCP
+methods as `ItemKind::Method` items, schema-hash sigs) + `schema_hash` (sha256
+over a canonical schema, `serde` feature) + `protocol_surface!` macro. Schema
+change → `SignatureChanged`/Breaking (existing `Method` classify arm), added
+method → Compatible. 8b (bro-tui embed) + 9 stay gated on bro-cli settling.
+
+### 📂 Files Modified
+- `crates/api-drift/src/{surface.rs, snapshot_file.rs, lib.rs}`
+- `.jagent/planning/tickets/APIDRIFT-{8,9}-*.md`, `TASKS.md`, `STATE.md`
+
+### 🔗 References
+- bro-cli: `BRO-98 PR2` merged, `BRO-113` in flight (parallel-box doctrine)
+
 ## [2026-09-14] - APIDRIFT-14 data/catalog surface ✅
 
 ### 📝 Summary
