@@ -89,6 +89,22 @@ Added, re-price = SignatureChanged (Warning), delist = Removed (Breaking),
 `attrs=["deprecated"]` for delist-soon. Filed APIDRIFT-14 (needs `ItemKind::
 Row` + `CatalogSurface`).
 
+## [2026-09-15] - APIDRIFT-10 CLI check/note ✅
+
+### 📝 Summary
+New `crates/api-drift-cli` (`api-drift` bin): `check --dir [--json]`
+(fail-closed integrity over snapshots + ledger) and `note --dir --surface
+--note [--reference --author --json]` (append, chaining `from`/`to`, carrying
+breaks). `affected`/`release-hint` stubbed (gated on 11/9), exit 2. Added
+`std::error::Error` for `SnapshotFileError`/`LedgerError` (anyhow). Smoke
+tested against the repo's own `api-drift/` dir.
+
+### 📂 Files Modified
+- `crates/api-drift-cli/{Cargo.toml,src/main.rs}` (new)
+- `Cargo.toml` (member + clap/anyhow), `crates/api-drift/src/snapshot_file.rs`,
+  `crates/api-drift-ledger/src/lib.rs` (Error impls)
+- planning tree
+
 ## [2026-09-15] - APIDRIFT-12 guard (autoimmune_guard + confidence) ✅
 
 ### 📝 Summary

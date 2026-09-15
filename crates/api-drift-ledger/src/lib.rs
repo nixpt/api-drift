@@ -108,6 +108,8 @@ impl From<serde_json::Error> for LedgerError {
     }
 }
 
+impl std::error::Error for LedgerError {}
+
 /// Path of the ledger file for `dir`.
 pub fn ledger_path(dir: &Path) -> PathBuf {
     dir.join("ledger.jsonl")

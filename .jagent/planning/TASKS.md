@@ -16,7 +16,7 @@
 
 | ID | Task | Notes |
 |----|------|-------|
-| [APIDRIFT-10](./tickets/APIDRIFT-10-cli.md) | CLI: check/note/affected/release-hint | after 9 |
+| [APIDRIFT-10](./tickets/APIDRIFT-10-cli.md) | CLI: check/note done; affected/release-hint after 9/11 | check+note landed |
 | [APIDRIFT-11](./tickets/APIDRIFT-11-registry-gate.md) | registry + merge-gate hook | after 9 |
 | [APIDRIFT-12](./tickets/APIDRIFT-12-evorium-borrows.md) | Evorium borrows: guard done in core; relatedness+similarity remain | relatedness → 11 |
 | [APIDRIFT-13](./tickets/APIDRIFT-13-checkstand-breadboard.md) | checkstand borrows + breadboard | schemars sig done in 8a; breadboard later |

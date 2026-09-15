@@ -74,6 +74,8 @@ impl From<serde_json::Error> for SnapshotFileError {
     }
 }
 
+impl std::error::Error for SnapshotFileError {}
+
 /// sha256 over the canonical content: for each item (sorted by path)
 /// `path \0 kind \0 sig \0 attr1,attr2(sorted) \0`, joined by `\n`.
 /// Returns the `sha256:<hex>` string stored in the file.

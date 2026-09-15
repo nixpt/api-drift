@@ -24,10 +24,10 @@
 
 ## Active work
 
-_None right now — APIDRIFT-12's `autoimmune_guard` + `Suggestion.confidence`
-landed (evorium borrow #2, core primitive). Remaining unblocked slice:
-APIDRIFT-10 CLI `check`/`note` (upstream-side only; `affected`/`release-hint`
-need 9/11). APIDRIFT-8b + 9 stay gated on bro-cli settling._
+_None right now — APIDRIFT-10 `check`/`note` landed (CLI crate, upstream-side
+half; `affected`/`release-hint` gated on 9/11). Everything remaining on the
+board is gated on bro-cli settling: APIDRIFT-8b (bro-tui embed), APIDRIFT-9
+(bro-desktop consumer), and downstream 10-remainder/11/3._
 
 ## Blockers
 
