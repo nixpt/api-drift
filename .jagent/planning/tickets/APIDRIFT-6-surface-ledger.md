@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | backlog |
+| **Status** | done |
 | **Milestone** | M2 |
 | **Size** | M |
 | **Owner** | unassigned |
@@ -20,18 +20,37 @@ No `Surface` abstraction; no ledger test macro; no snapshot/ledger file I/O.
 `api-drift-ledger` crate with the `ledger!` test macro + `ledger.jsonl`
 history + migration-note prompt. Dogfood on api-drift itself.
 
-## Scope
-
-- in: Surface trait, enum macro, ledger crate, dogfood test
-- out: rust-public surface (APIDRIFT-7), protocol surface (APIDRIFT-8)
-
 ## Acceptance
 
-- [ ] `ledger!` test passes with no diff, fails with unrecorded diff + note cmd
-- [ ] `API_DRIFT_UPDATE=1` records locally; CI runs without it
-- [ ] Dogfood ledger committed on api-drift itself
-- [ ] `cargo test` green (or the project's equivalent)
+- [x] `ledger!` passes with no diff, fails with unrecorded diff + note cmd
+- [x] `API_DRIFT_UPDATE=1` records locally; CI runs without it
+- [x] Dogfood ledger committed on api-drift itself (`api-drift/item-kind.*`)
+- [x] `cargo test` green: 35 core / 41 all-features / 0 errors; clippy `-D warnings` + rustdoc `-D warnings` + `cargo fmt --check` clean
 
 ## Notes
 
-Design doc § "The ledger test, concretely". Depends on APIDRIFT-5.
+Design doc § "The ledger test, concretely". Depends on APIDRIFT-5. Also folds
+in APIDRIFT-12's first two borrows (note-as-antibody + `corroboration`).
+
+## Resolution
+
+- **Workspace conversion**: repo root is now a virtual `[workspace]` with
+  members `crates/api-drift` (core, moved from `src/`) and
+  `crates/api-drift-ledger`; lints/deps/package metadata inherit from
+  `[workspace.*]`. Upstream release metadata (rust-version 1.74, keywords,
+  `assets/` exclude) preserved.
+- **`src/surface.rs`** (core, pure std): `Surface` trait, `EnumSurface`
+  (variant list → `ItemKind::Variant` items), `enum_surface!` macro
+  (comma/bracket form so it nests inside `ledger!`).
+- **`api-drift-ledger`**: `LedgerEntry` (with `note`, `author`, `ref`,
+  `breaks`, `from`/`to` hashes), `read_entries`/`append_entry` (append-only
+  JSONL, fail-closed on bad lines), `is_recorded`, `corroboration`,
+  `record`, `check` (Clean/Recorded/Unrecorded/Updated/Initialized),
+  `check_all`/`check_one`, and the `ledger!` test macro (`;`-terminated
+  surface list).
+- **Dogfood**: `crates/api-drift/tests/dogfood.rs` embeds a `ledger!` over
+  `snapshot::ItemKind`, with committed `api-drift/item-kind.snapshot.json`
+  + `api-drift/ledger.jsonl`.
+- **Tests**: 29 core lib + 1 dogfood + 4 ledger unit tests
+  (init/drift-drill/recorded-hash+bad-line fail-closed).
+

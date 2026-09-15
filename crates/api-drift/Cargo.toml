@@ -1,0 +1,36 @@
+[package]
+name = "api-drift"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "../README.md"
+keywords.workspace = true
+categories.workspace = true
+rust-version.workspace = true
+description = "API drift handler: snapshot crate surfaces, diff versions, classify breaks, suggest downstream patches"
+# Ship the crate, not the fleet: planning board, agent memory, dev scripts and
+# design notes stay in git but out of the crates.io package.
+exclude = [".jagent/", ".dejavue/", ".cargo/", "scripts/", "docs/", "assets/", "CLAUDE.md", "STATE.md", ".gitattributes"]
+
+[features]
+default = []
+# rustdoc-JSON → ApiSnapshot producer (APIDRIFT-2). Pulls serde_json only here.
+producer = ["dep:serde_json", "serde"]
+# Serialization for the embedded ledger (APIDRIFT-5): serde derives on
+# snapshot/break/suggestion types, snapshot file format v1, content hashing
+# (sha256). The core stays pure std without this.
+serde = ["dep:serde", "dep:serde_json", "dep:sha2", "dep:hex"]
+
+[dependencies]
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
+hex = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+api-drift-ledger = { workspace = true }
+
+[lints]
+workspace = true

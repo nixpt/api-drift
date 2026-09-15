@@ -13,29 +13,28 @@
 | arniko 0.2.98→0.2.99 demo | **shipped** | tests/arniko_demo.rs (synthetic rustdoc docs) |
 | core correctness (review prereqs) | **shipped** | APIDRIFT-4 |
 | action enum + attrs + serde + snapshot v1 | **shipped** | APIDRIFT-5 |
+| Surface + ledger crate + dogfood | **shipped** | APIDRIFT-6 (workspace: core + api-drift-ledger) |
 | embedded-ledger design | **proposed** | docs/DESIGN-embedded-ledger.md (captain+foreman review) |
-| Surface + ledger crate + dogfood | **next** | APIDRIFT-6 |
-| bro-acp pair (protocol + consumer) | **planned** | APIDRIFT-8 ∥ APIDRIFT-9, first customer |
-| Evorium borrows (antibodies/guard/relatedness) | **backlog** | APIDRIFT-12, woven into 6/9/11 |
+| bro-acp pair (protocol + consumer) | **next** | APIDRIFT-8 ∥ APIDRIFT-9, first customer |
+| Evorium borrows (antibodies/guard/relatedness) | **in progress** | APIDRIFT-12: antibodies+corroboration in 6; guard+relatedness in 9/11 |
 
 ## Active work
 
-_None — APIDRIFT-5 landed and pushed. Next: APIDRIFT-6._
+_None — APIDRIFT-6 landed (workspace conversion + api-drift-ledger). Next:
+APIDRIFT-8 ∥ APIDRIFT-9 (bro-acp pair)._
 
 ## Blockers
 
-_None._
+_None (upstream scrubbed the stale `/build` blocker; builds run in `/tmp`)._
 
 ## Metrics
 
 | Metric | Value |
 |--------|-------|
-| Unit tests (core) | 25 + 1 doctest |
-| Unit tests (`--features serde`) | 29 + 1 doctest |
-| Unit tests (`--features producer`) | 34 + 1 demo + 1 doctest |
-| Unit tests (`--features serde,producer`) | 34 + 1 demo + 1 doctest |
+| Unit tests (core lib, no features) | 29 + 1 doctest |
+| Unit tests (`--workspace --all-features`) | 34 + 4 ledger + 1 dogfood + 1 demo + 1 doctest |
 | Test pass rate | 100% |
-| Warnings | 0 (clippy `-D warnings` clean on all four combos) |
+| Warnings | 0 (clippy `-D warnings`, rustdoc `-D warnings`, `cargo fmt --check` clean) |
 
 ## Next (ranked)
 

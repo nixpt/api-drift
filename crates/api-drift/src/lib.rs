@@ -41,6 +41,7 @@ pub mod snapshot;
 #[cfg(feature = "serde")]
 pub mod snapshot_file;
 pub mod suggest;
+pub mod surface;
 
 pub use classify::{BreakKind, ClassifiedBreak, Severity};
 pub use diff::ApiDiff;
@@ -51,3 +52,4 @@ pub use snapshot_file::{
     SnapshotFileError,
 };
 pub use suggest::{Suggestion, SuggestionAction};
+pub use surface::{EnumSurface, Surface};

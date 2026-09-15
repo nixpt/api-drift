@@ -33,6 +33,32 @@ live against format v61 (55 public items). `tests/arniko_demo.rs` end-to-end.
 ### 📂 Files Modified
 - `src/producer.rs`, `tests/arniko_demo.rs`, `Cargo.toml` (feature + dev-deps)
 
+## [2026-09-14] - APIDRIFT-6 Surface + api-drift-ledger + dogfood ✅
+
+### 📝 Summary
+Converted the repo to a virtual workspace: `crates/api-drift` (core, moved
+from `src/`) + new `crates/api-drift-ledger`. Core gains a pure-std
+`surface` module (`Surface` trait, `EnumSurface`, `enum_surface!`).
+Ledger crate ships `LedgerEntry`/`append_entry`/`read_entries`/`is_recorded`/
+`corroboration`/`record`/`check` + the `ledger!` test macro (surface list
+`;`-terminated so a nested `enum_surface!` doesn't trip `macro_rules!`).
+Dogfood: `crates/api-drift/tests/dogfood.rs` embeds a ledger over
+`snapshot::ItemKind` with committed `api-drift/item-kind.snapshot.json` +
+`ledger.jsonl`. Folds APIDRIFT-12's antibody-note + corroboration. Fetched +
+fast-forwarded upstream (release/publish/branding/docs) and reconciled
+Cargo.toml workspace conversion against it.
+
+### 📂 Files Modified
+- `Cargo.toml` (→ virtual workspace), `Cargo.lock`
+- `src/*` → `crates/api-drift/src/*` (+ new `surface.rs`), `tests` → `crates/api-drift/tests/` (+ `dogfood.rs`)
+- `crates/api-drift-ledger/{Cargo.toml,src/lib.rs}` (new)
+- `api-drift/{item-kind.snapshot.json,ledger.jsonl}` (dogfood, new)
+- planning tree
+
+### 🔗 References
+- `docs/DESIGN-embedded-ledger.md` § "The ledger test, concretely" + Evorium borrows
+
+
 ## [2026-09-14] - APIDRIFT-12 Evorium borrow survey 📋
 
 ### 📝 Summary

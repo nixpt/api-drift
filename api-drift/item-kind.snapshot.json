@@ -1,0 +1,74 @@
+{
+  "format": "api-drift/snapshot/v1",
+  "surface": "item-kind",
+  "version": "api_drift::snapshot::ItemKind",
+  "items": [
+    {
+      "path": "api_drift::snapshot::ItemKind::Const",
+      "kind": "Variant",
+      "sig": "Const",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Enum",
+      "kind": "Variant",
+      "sig": "Enum",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Field",
+      "kind": "Variant",
+      "sig": "Field",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Function",
+      "kind": "Variant",
+      "sig": "Function",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Method",
+      "kind": "Variant",
+      "sig": "Method",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Module",
+      "kind": "Variant",
+      "sig": "Module",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Other",
+      "kind": "Variant",
+      "sig": "Other",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Static",
+      "kind": "Variant",
+      "sig": "Static",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Struct",
+      "kind": "Variant",
+      "sig": "Struct",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Trait",
+      "kind": "Variant",
+      "sig": "Trait",
+      "attrs": []
+    },
+    {
+      "path": "api_drift::snapshot::ItemKind::Variant",
+      "kind": "Variant",
+      "sig": "Variant",
+      "attrs": []
+    }
+  ],
+  "content_hash": "sha256:75dffbc115e170f1d050080daf758cc05783861b39cfd00077f26056fdedb254"
+}

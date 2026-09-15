@@ -6,10 +6,20 @@ version = 3
 name = "api-drift"
 version = "0.1.0"
 dependencies = [
+ "api-drift-ledger",
  "hex",
  "serde",
  "serde_json",
  "sha2",
+]
+
+[[package]]
+name = "api-drift-ledger"
+version = "0.1.0"
+dependencies = [
+ "api-drift",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
