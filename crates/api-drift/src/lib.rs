@@ -51,6 +51,7 @@ pub use snapshot_file::{
     content_hash, parse_snapshot_file, render_snapshot_file, schema_hash, to_string_pretty,
     SnapshotFile, SnapshotFileError,
 };
+pub use suggest::autoimmune_guard;
 pub use suggest::{Suggestion, SuggestionAction};
 #[cfg(feature = "producer")]
 pub use surface::RustPublicSurface;

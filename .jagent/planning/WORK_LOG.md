@@ -89,6 +89,19 @@ Added, re-price = SignatureChanged (Warning), delist = Removed (Breaking),
 `attrs=["deprecated"]` for delist-soon. Filed APIDRIFT-14 (needs `ItemKind::
 Row` + `CatalogSurface`).
 
+## [2026-09-15] - APIDRIFT-12 guard (autoimmune_guard + confidence) ✅
+
+### 📝 Summary
+Evorium borrow #2: `Suggestion.confidence: f64` (serde default 1.0) + free
+`autoimmune_guard(&Suggestion) -> Suggestion` — a low-confidence auto-apply
+downgrades to review, never auto-applied on a hunch. Confidence wired through
+`rename-call` (1.0), `review-rename` (0.5), review/remove actions (0.0).
+`Suggestion` drops the `Eq` derive (f64), no callers relied on it.
+
+### 📂 Files Modified
+- `crates/api-drift/src/{suggest.rs, lib.rs}`
+- planning tree
+
 ## [2026-09-15] - APIDRIFT-7 rust-public surface + arniko ledger demo ✅
 
 ### 📝 Summary

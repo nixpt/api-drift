@@ -16,7 +16,7 @@
 | Surface + ledger crate + dogfood | **shipped** | APIDRIFT-6 (workspace: core + api-drift-ledger) |
 | embedded-ledger design | **proposed** | docs/DESIGN-embedded-ledger.md (captain+foreman review) |
 | bro-acp pair (protocol + consumer) | **next** | APIDRIFT-8 ∥ APIDRIFT-9, first customer |
-| Evorium borrows (antibodies/guard/relatedness) | **in progress** | APIDRIFT-12: antibodies+corroboration in 6; guard+relatedness in 9/11 |
+| Evorium borrows (antibodies/guard/relatedness) | **in progress** | antibodies+corroboration (6); guard (core); relatedness → 11 |
 | checkstand borrows + breadboard | **backlog** | APIDRIFT-13: real-server bar + schemars sig → 8/9/6 |
 | data/catalog surface | **shipped** | APIDRIFT-14: ItemKind::Row + CatalogSurface |
 | protocol surface (api-drift side) | **shipped** | APIDRIFT-8a: ProtocolSurface + schema_hash |
@@ -24,11 +24,10 @@
 
 ## Active work
 
-_None right now — APIDRIFT-7 landed (rust-public surface + arniko ledger
-demo). Next unblocked slice: APIDRIFT-12's `autoimmune_guard` +
-`Suggestion.confidence` (core primitive, no external repo), then APIDRIFT-10
-CLI `check`/`note` (upstream-side only; `affected`/`release-hint` need 9/11).
-APIDRIFT-8b + 9 stay gated on bro-cli settling._
+_None right now — APIDRIFT-12's `autoimmune_guard` + `Suggestion.confidence`
+landed (evorium borrow #2, core primitive). Remaining unblocked slice:
+APIDRIFT-10 CLI `check`/`note` (upstream-side only; `affected`/`release-hint`
+need 9/11). APIDRIFT-8b + 9 stay gated on bro-cli settling._
 
 ## Blockers
 
@@ -39,8 +38,8 @@ APIDRIFT-8b + 9 stay gated on bro-cli settling._
 
 | Metric | Value |
 |--------|-------|
-| Unit tests (core lib, no features) | 35 + 1 doctest |
-| Unit tests (`--workspace --all-features`) | 45 + 4 ledger + 1 dogfood + 2 demo + 1 doctest |
+| Unit tests (core lib, no features) | 38 + 1 doctest |
+| Unit tests (`--workspace --all-features`) | 48 + 4 ledger + 1 dogfood + 2 demo + 1 doctest |
 | Test pass rate | 100% |
 | Warnings | 0 (clippy `-D warnings`, rustdoc `-D warnings`, `cargo fmt --check` clean) |
 

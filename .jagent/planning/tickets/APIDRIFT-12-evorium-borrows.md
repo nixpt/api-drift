@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | backlog (inputs into 6/9/11, not standalone) |
+| **Status** | in_progress — antibodies (6) + guard done; relatedness + similarity remain |
 | **Milestone** | M2 |
 | **Size** | S–M (spread across 6/9/11) |
 | **Owner** | unassigned |
 | **Created** | 2026-09-14 |
-| **Updated** | 2026-09-14 |
+| **Updated** | 2026-09-15 |
 
 ## Problem
 
@@ -49,8 +49,9 @@ the fleet: Evorium":
 
 ## Acceptance
 
-- [ ] Ledger entry format (APIDRIFT-6) includes note + corroboration fields
-- [ ] Auto-applier consults confidence guard (landed with 9 or 11)
+- [x] Ledger entry format (APIDRIFT-6) includes note + `corroboration`
+- [x] Auto-applier consults a confidence guard — `Suggestion.confidence: f64`
+      + `autoimmune_guard` landed in core (15)
 - [ ] Gate output ranks repos by relatedness (landed with 11)
 - [ ] Similarity-metric comparison documented (adopt or reject with reason)
 

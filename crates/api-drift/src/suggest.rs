@@ -10,10 +10,13 @@ use crate::snapshot::ItemKind;
 /// A mechanical downstream edit, in machine-matchable form.
 ///
 /// `action` is the stable enum downstream matches on; `detail` is the
-/// rendered human form; `auto_appliable` gates script application. The
-/// string `name()`s are frozen (serde + ledger files depend on them) —
-/// add variants, never rename.
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// rendered human form; `auto_appliable` gates script application; `confidence`
+/// is how sure the engine is that the auto-apply is *correct* (a rename with a
+/// verified target is 1.0; a speculative one is lower). The ledger's
+/// auto-applier must run [`autoimmune_guard`] before applying — a
+/// low-confidence auto-apply stays a review item. The string `name()`s are
+/// frozen (serde + ledger files depend on them) — add variants, never rename.
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Suggestion {
     /// Canonical path of the affected upstream item.
@@ -25,6 +28,15 @@ pub struct Suggestion {
     /// True when a script can apply this without judgment (pure rename with
     /// a known target). False means a human/agent must review first.
     pub auto_appliable: bool,
+    /// Confidence in `[0, 1]` that the suggestion is correct. Drives
+    /// [`autoimmune_guard`]; default 1.0.
+    #[cfg_attr(feature = "serde", serde(default = "default_confidence"))]
+    pub confidence: f64,
+}
+
+/// Default confidence when a producer doesn't state one.
+pub fn default_confidence() -> f64 {
+    1.0
 }
 
 /// The edit verb, with the fields the applier needs. Covers every action the
@@ -121,6 +133,7 @@ pub fn suggest_for_breaks(breaks: &[ClassifiedBreak]) -> Vec<Suggestion> {
                     },
                     detail,
                     auto_appliable: true,
+                    confidence: 1.0,
                 });
             } else {
                 out.push(rename_review_for(b, from, to));
@@ -144,6 +157,7 @@ fn rename_review_for(b: &ClassifiedBreak, from: &str, to: &str) -> Suggestion {
         },
         detail: format!("possible rename {from} -> {to}; verify sigs then rename call sites"),
         auto_appliable: false,
+        confidence: 0.5,
     }
 }
 
@@ -181,6 +195,7 @@ fn suggest_single(b: &ClassifiedBreak) -> Suggestion {
                 action,
                 detail,
                 auto_appliable: auto,
+                confidence: if auto { 1.0 } else { 0.5 },
             }
         }
         BreakKind::Removed => Suggestion {
@@ -188,6 +203,7 @@ fn suggest_single(b: &ClassifiedBreak) -> Suggestion {
             action: SuggestionAction::RemoveItem,
             detail: format!("drop or gate uses of removed {}", b.path),
             auto_appliable: false,
+            confidence: 0.0,
         },
         BreakKind::SignatureChanged => {
             let old = b.old_sig.clone().unwrap_or_else(|| "?".to_owned());
@@ -200,6 +216,7 @@ fn suggest_single(b: &ClassifiedBreak) -> Suggestion {
                 },
                 detail: format!("update call sites of {}: `{old}` -> `{new}`", b.path),
                 auto_appliable: false,
+                confidence: 0.0,
             }
         }
         BreakKind::KindChanged => Suggestion {
@@ -207,7 +224,30 @@ fn suggest_single(b: &ClassifiedBreak) -> Suggestion {
             action: SuggestionAction::ReviewKind,
             detail: format!("item {} changed kind; rework usage", b.path),
             auto_appliable: false,
+            confidence: 0.0,
         },
+    }
+}
+
+/// Anti-autoimmune check (mirrors evorium's `immune::autoimmune_guard`): a
+/// suggestion marked auto-appliable but with low confidence must be
+/// downgraded to review — never auto-applied on a hunch. Returns the
+/// corrected suggestion (a clone when unchanged).
+///
+/// The ledger's auto-applier (APIDRIFT-3/9) must run this before applying
+/// anything; producers that don't state a `confidence` default to 1.0 and
+/// pass through unchanged.
+pub fn autoimmune_guard(suggestion: &Suggestion) -> Suggestion {
+    if suggestion.auto_appliable && suggestion.confidence < 0.5 {
+        let mut out = suggestion.clone();
+        out.auto_appliable = false;
+        out.detail = format!(
+            "{} (low confidence {:.2} — auto-apply kept for review)",
+            suggestion.detail, suggestion.confidence,
+        );
+        out
+    } else {
+        suggestion.clone()
     }
 }
 
@@ -618,5 +658,58 @@ mod tests {
         assert!(it.has_attr("deprecated"));
         assert!(it.has_attr("a"));
         assert!(!it.has_attr("non_exhaustive"));
+    }
+
+    fn sug(auto: bool, confidence: f64) -> Suggestion {
+        Suggestion {
+            path: "m::f".to_owned(),
+            action: SuggestionAction::RenameCall {
+                from: "m::f".to_owned(),
+                to: "m::g".to_owned(),
+            },
+            detail: "rename m::f -> m::g".to_owned(),
+            auto_appliable: auto,
+            confidence,
+        }
+    }
+
+    #[test]
+    fn confident_rename_has_full_confidence() {
+        let breaks = vec![
+            brk_sig(
+                "m::old",
+                BreakKind::Removed,
+                ItemKind::Function,
+                "pub fn old(&self)",
+                "",
+            ),
+            brk_sig(
+                "m::new",
+                BreakKind::Added,
+                ItemKind::Function,
+                "",
+                "pub fn new(&self)",
+            ),
+        ];
+        let out = suggest_for_breaks(&breaks);
+        assert!((out[0].confidence - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn autoimmune_guard_downgrades_low_confidence_auto() {
+        let guarded = autoimmune_guard(&sug(true, 0.3));
+        assert!(!guarded.auto_appliable);
+        assert!(guarded.detail.contains("kept for review"));
+        assert!((guarded.confidence - 0.3).abs() < f64::EPSILON); // recorded, not edited
+    }
+
+    #[test]
+    fn autoimmune_guard_leaves_high_confidence_and_review_alone() {
+        let confident = autoimmune_guard(&sug(true, 1.0));
+        assert!(confident.auto_appliable);
+
+        let review = autoimmune_guard(&sug(false, 0.3));
+        assert!(!review.auto_appliable); // already review; detail untouched
+        assert!(!review.detail.contains("kept for review"));
     }
 }
