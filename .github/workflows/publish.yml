@@ -17,6 +17,11 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      verify_auth:
+        description: "Only prove the crates.io Trusted Publishing exchange works (no publish)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -72,10 +77,22 @@ jobs:
           cargo publish --dry-run
 
       - name: crates.io trusted publishing token
-        if: steps.exists.outputs.skip != 'true'
+        if: steps.exists.outputs.skip != 'true' || inputs.verify_auth == true
         id: auth
         uses: rust-lang/crates-io-auth-action@v1
         continue-on-error: true # falls back to the CARGO_REGISTRY_TOKEN secret below
+
+      - name: report trusted publishing status (verify_auth)
+        if: inputs.verify_auth == true
+        env:
+          TP_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          if [ -n "$TP_TOKEN" ]; then
+            echo "trusted publishing OK: crates.io issued a short-lived token to this workflow (length ${#TP_TOKEN})"
+          else
+            echo "::error::trusted publishing FAILED: crates.io did not issue a token — check the crate's Trusted Publishing config (repo nixpt/api-drift, workflow publish.yml)"
+            exit 1
+          fi
 
       - name: cargo publish
         if: steps.exists.outputs.skip != 'true'
