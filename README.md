@@ -1,5 +1,9 @@
 # api-drift
 
+<p align="center">
+  <img src="assets/branding/api-drift-banner-1200.png" alt="api-drift — Contract drift detection, break classification, and mechanical patch suggestion" width="100%">
+</p>
+
 Snapshot a Rust crate's public surface, diff two versions, classify each
 change by how badly it breaks a downstream, and suggest the mechanical edit
 that fixes it.
@@ -154,7 +158,8 @@ cargo clippy --all-targets --all-features -- -D warnings
 ```
 
 See `CONTRIBUTING.md` for the full gate CI runs, the layout, and the
-invariants tests protect.
+invariants tests protect. See [`docs/BRANDING.md`](docs/BRANDING.md) for brand
+guidelines, color palettes, and assets.
 
 ## License
 
