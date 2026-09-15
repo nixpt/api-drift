@@ -59,6 +59,26 @@ Cargo.toml workspace conversion against it.
 - `docs/DESIGN-embedded-ledger.md` § "The ledger test, concretely" + Evorium borrows
 
 
+## [2026-09-14] - APIDRIFT-13 checkstand borrow survey 📋
+
+### 📝 Summary
+Audited `projects/checkstand` (same universe). It already *practises* the
+api-drift discipline by hand: `StoreError` (18 variants) + `DomainEvent` (9,
+`#[serde(tag="type")]`) are enum surfaces, 7 adapters are consumers, and its
+`AGENTS.md` rule #2 is literally "new variant = compile error in every adapter,
+exhaustive match, no `_`". Filed APIDRIFT-13: borrow the real-server test bar
+(rule #3) → APIDRIFT-9's `syn` usage scan, borrow `schemars::JsonSchema` tool
+args → APIDRIFT-8 schema-hash sig, reframe `Unrecorded` note as a decision
+record, and record checkstand-core as a third ledger breadboard.
+
+### 📂 Files Modified
+- `docs/DESIGN-embedded-ledger.md` (new section)
+- `.jagent/planning/tickets/APIDRIFT-13-checkstand-breadboard.md` (new)
+- `.jagent/planning/{STATE,TASKS}.md`
+
+### 🔗 References
+- `projects/checkstand` (`AGENTS.md`, `crates/checkstand-core`, `crates/checkstand-mcp`)
+
 ## [2026-09-14] - APIDRIFT-12 Evorium borrow survey 📋
 
 ### 📝 Summary

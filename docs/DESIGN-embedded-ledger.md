@@ -214,6 +214,45 @@ map almost one-to-one onto the embedded ledger; filed as APIDRIFT-12:
 Privacy invariant shared and adopted: observations/ledger entries carry only
 failure patterns (paths, sigs, hashes) — never user data.
 
+## Prior art within the fleet: checkstand (the manual, single-repo version)
+
+`projects/checkstand` is the same universe, one step behind in time: it
+*already* runs the drift discipline api-drift automates, but as a convention
+inside one repo instead of a cross-repo, pre-merge, ledgable gate.
+
+Its own `AGENTS.md` operating rule #2 is the thesis, verbatim:
+
+> Every `StoreError` variant must be exhaustively matched in every adapter's
+> error-mapping function — no wildcard `_` arm. Adding a variant to core is
+> supposed to be a compile error in every adapter until you decide what HTTP
+> status / gRPC code / GraphQL error it maps to.
+
+checkstand-core's `StoreError` (18 variants) + `DomainEvent` (9 variants,
+`#[serde(tag = "type")]`) are enum surfaces; its 7 adapter crates are the
+consumers; the `From<StoreError>` mappers (e.g. `checkstand-rest`'s
+`ApiError::from`) are the call-sites. api-drift turns rule #2 from a
+"remember to write exhaustive matches" convention into a mechanical
+`Added Variant → Warning → add-match-arm` finding, recorded in a ledger
+with a migration note, reported across repositories and *before* merge.
+Filed as APIDRIFT-13:
+
+| checkstand piece | Where | Borrow |
+|---|---|---|
+| AGENTS rule #2 ("adding a variant is *a decision to be made*, not a paper-over") | core philosophy | Reframe `Unrecorded` drift: the recording note is the producer's decision record, not just a prompt — keep the "no catch-all `_`" spirit in the consumer check. |
+| Rule #3 (never call a handler in a test — spawn the real server + real clients) | APIDRIFT-9 consumer check | The "real, not asserted" bar: usage scan must be a genuine `syn` walk of the consumer's source, and the test must drive the real check, not a fixture. |
+| `schemars::JsonSchema` on MCP tool args + `#[tool(description = …)]` | APIDRIFT-8 protocol surface | Schema-hash sig: hash each tool's request/response JSON Schema. checkstand-mcp proves it's cheap and already in-fleet (every `*Args` struct derives it). |
+| `#[serde(tag = "type")]` `DomainEvent` externally-tagged enum | APIDRIFT-7/8 surface targets | A wire-visible enum is a first-class `enum_surface!` target; the serde tag discriminant is the natural variant sig. |
+
+### checkstand as a third breadboard
+
+Beyond bro-acp (APIDRIFT-8+9) and arniko (APIDRIFT-7), checkstand-core is the
+cleanest self-contained demo of the ledger: `ledger!` over `StoreError` +
+`DomainEvent`; its 7 adapters are the "consumers" a registry/merge-gate
+(APIDRIFT-11) would list when a variant is added. A new `StoreError` variant
+becomes one ledger entry + `add-match-arm ×7` (one per adapter) instead of
+seven simultaneous compile errors discovered one `cargo check` at a time.
+
+
 ## Non-goals
 
 - Auto-landing patches without review (unchanged from the roadmap).
