@@ -12,7 +12,7 @@ categories = ["development-tools"]
 rust-version = "1.74"
 # Ship the crate, not the fleet: planning board, agent memory, dev scripts and
 # design notes stay in git but out of the crates.io package.
-exclude = [".jagent/", ".dejavue/", ".cargo/", "scripts/", "docs/", "CLAUDE.md", "STATE.md", ".gitattributes"]
+exclude = [".jagent/", ".dejavue/", ".cargo/", "scripts/", "docs/", "assets/", "CLAUDE.md", "STATE.md", ".gitattributes"]
 
 [features]
 default = []

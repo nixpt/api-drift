@@ -1,7 +1,7 @@
 # api-drift
 
 <p align="center">
-  <img src="assets/branding/api-drift-banner-1200.png" alt="api-drift — Contract drift detection, break classification, and mechanical patch suggestion" width="100%">
+  <img src="https://raw.githubusercontent.com/nixpt/api-drift/main/assets/branding/api-drift-banner-1200.png" alt="api-drift — Contract drift detection, break classification, and mechanical patch suggestion" width="100%">
 </p>
 
 Snapshot a Rust crate's public surface, diff two versions, classify each
