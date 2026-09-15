@@ -1,0 +1,20 @@
+{
+  "format": "api-drift/snapshot/v1",
+  "surface": "rust-public",
+  "version": "arniko 0.2.99",
+  "items": [
+    {
+      "path": "arniko::Alert::new",
+      "kind": "Function",
+      "sig": "{\"sig\":{\"inputs\":[[\"message\",{\"resolved_path\":{\"args\":null,\"id\":0,\"path\":\"String\"}}]],\"output\":null}}",
+      "attrs": []
+    },
+    {
+      "path": "arniko::Badge",
+      "kind": "Struct",
+      "sig": "{\"fields\":[],\"impls\":[],\"kind\":\"plain\"}",
+      "attrs": []
+    }
+  ],
+  "content_hash": "sha256:b59e962e707ab81bb92e67ea6f9afcb57f47d3f3e0773d98bf733d25db1b5d0d"
+}

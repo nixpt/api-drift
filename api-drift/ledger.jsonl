@@ -1,1 +1,2 @@
 {"ts":1789429430,"surface":"item-kind","from":"","to":"sha256:75dffbc115e170f1d050080daf758cc05783861b39cfd00077f26056fdedb254","version":"api_drift::snapshot::ItemKind","breaks":[],"note":"","author":"unknown","ref":""}
+{"ts":1789460420,"surface":"rust-public","from":"","to":"sha256:b59e962e707ab81bb92e67ea6f9afcb57f47d3f3e0773d98bf733d25db1b5d0d","version":"arniko 0.2.99","breaks":[],"note":"","author":"unknown","ref":""}

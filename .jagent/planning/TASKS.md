@@ -16,11 +16,10 @@
 
 | ID | Task | Notes |
 |----|------|-------|
-| [APIDRIFT-7](./tickets/APIDRIFT-7-rust-public-surface.md) | rust-public surface, arniko ledger demo | after 6 |
 | [APIDRIFT-10](./tickets/APIDRIFT-10-cli.md) | CLI: check/note/affected/release-hint | after 9 |
 | [APIDRIFT-11](./tickets/APIDRIFT-11-registry-gate.md) | registry + merge-gate hook | after 9 |
-| [APIDRIFT-12](./tickets/APIDRIFT-12-evorium-borrows.md) | Evorium borrows (antibodies done in 6; guard/relatedness remain) | woven into 9/11 |
-| [APIDRIFT-13](./tickets/APIDRIFT-13-checkstand-breadboard.md) | checkstand borrows (real-server bar, schemars sig) + breadboard | schemars sig → 8a |
+| [APIDRIFT-12](./tickets/APIDRIFT-12-evorium-borrows.md) | Evorium borrows (guard/relatedness remain) | guard = core, unblocked; relatedness → 11 |
+| [APIDRIFT-13](./tickets/APIDRIFT-13-checkstand-breadboard.md) | checkstand borrows + breadboard | schemars sig done in 8a; breadboard later |
 | [APIDRIFT-3](./tickets/APIDRIFT-3-applier.md) | call-site applier / codemod | after 5, 9 |
 
 ## Done
@@ -33,6 +32,8 @@
 | [APIDRIFT-5](./tickets/APIDRIFT-5-action-enum-serde.md) | action enum + attrs + serde + snapshot v1 | 2026-09-14 |
 | [APIDRIFT-6](./tickets/APIDRIFT-6-surface-ledger.md) | Surface trait + ledger crate + dogfood | 2026-09-14 |
 | [APIDRIFT-14](./tickets/APIDRIFT-14-catalog-surface.md) | data/catalog surface (ItemKind::Row + CatalogSurface) | 2026-09-14 |
+| [APIDRIFT-8a](./tickets/APIDRIFT-8-protocol-surface.md) | protocol surface (ProtocolSurface + schema_hash) | 2026-09-15 |
+| [APIDRIFT-7](./tickets/APIDRIFT-7-rust-public-surface.md) | rust-public surface + arniko ledger demo | 2026-09-15 |
 
 
 

@@ -19,13 +19,16 @@
 | Evorium borrows (antibodies/guard/relatedness) | **in progress** | APIDRIFT-12: antibodies+corroboration in 6; guard+relatedness in 9/11 |
 | checkstand borrows + breadboard | **backlog** | APIDRIFT-13: real-server bar + schemars sig → 8/9/6 |
 | data/catalog surface | **shipped** | APIDRIFT-14: ItemKind::Row + CatalogSurface |
+| protocol surface (api-drift side) | **shipped** | APIDRIFT-8a: ProtocolSurface + schema_hash |
+| rust-public surface | **shipped** | APIDRIFT-7: RustPublicSurface + arniko ledger demo |
 
 ## Active work
 
-_APIDRIFT-8a — api-drift-side protocol surface (`ProtocolSurface` +
-`schema_hash`). APIDRIFT-8b (bro-tui embed) and APIDRIFT-9 held: bro-cli is
-being actively worked (BRO-98 PR2 merged, BRO-113 in flight) — read-only
-against it until it settles._
+_None right now — APIDRIFT-7 landed (rust-public surface + arniko ledger
+demo). Next unblocked slice: APIDRIFT-12's `autoimmune_guard` +
+`Suggestion.confidence` (core primitive, no external repo), then APIDRIFT-10
+CLI `check`/`note` (upstream-side only; `affected`/`release-hint` need 9/11).
+APIDRIFT-8b + 9 stay gated on bro-cli settling._
 
 ## Blockers
 
@@ -37,7 +40,7 @@ against it until it settles._
 | Metric | Value |
 |--------|-------|
 | Unit tests (core lib, no features) | 35 + 1 doctest |
-| Unit tests (`--workspace --all-features`) | 45 + 4 ledger + 1 dogfood + 1 demo + 1 doctest |
+| Unit tests (`--workspace --all-features`) | 45 + 4 ledger + 1 dogfood + 2 demo + 1 doctest |
 | Test pass rate | 100% |
 | Warnings | 0 (clippy `-D warnings`, rustdoc `-D warnings`, `cargo fmt --check` clean) |
 

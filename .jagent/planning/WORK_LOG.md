@@ -89,6 +89,21 @@ Added, re-price = SignatureChanged (Warning), delist = Removed (Breaking),
 `attrs=["deprecated"]` for delist-soon. Filed APIDRIFT-14 (needs `ItemKind::
 Row` + `CatalogSurface`).
 
+## [2026-09-15] - APIDRIFT-7 rust-public surface + arniko ledger demo ✅
+
+### 📝 Summary
+Wired the APIDRIFT-2 producer into a real `Surface`: `RustPublicSurface`
+(behind `producer`, parses rustdoc JSON eagerly at construction). New
+`tests/rust_public_demo.rs` embeds `ledger!` over a synthetic arniko 0.2.99
+rustdoc doc → committed `api-drift/rust-public.snapshot.json` + ledger entry.
+Closes the producer→ledger gap; no external repo edits.
+
+### 📂 Files Modified
+- `crates/api-drift/src/{surface.rs, lib.rs}`
+- `crates/api-drift/tests/rust_public_demo.rs` (new)
+- `api-drift/{rust-public.snapshot.json, ledger.jsonl}` (dogfood)
+- planning tree
+
 ## [2026-09-15] - APIDRIFT-8a protocol surface ✅ (+ APIDRIFT-9 held)
 
 ### 📝 Summary

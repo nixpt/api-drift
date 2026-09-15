@@ -52,4 +52,6 @@ pub use snapshot_file::{
     SnapshotFile, SnapshotFileError,
 };
 pub use suggest::{Suggestion, SuggestionAction};
+#[cfg(feature = "producer")]
+pub use surface::RustPublicSurface;
 pub use surface::{CatalogSurface, EnumSurface, ProtocolSurface, Surface};

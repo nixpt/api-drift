@@ -221,6 +221,56 @@ macro_rules! protocol_surface {
     };
 }
 
+/// A [`Surface`] over a crate's Rust `pub` API, produced from rustdoc JSON
+/// (`cargo +nightly rustdoc -- -Z unstable-options --output-format json`).
+///
+/// Requires the `producer` feature (pulls `serde_json`). The snapshot is
+/// parsed **eagerly** at construction (a broken rustdoc file fails then and
+/// there, not silently at test time); `Surface::snapshot` clones it.
+///
+/// ```ignore
+/// let s = api_drift::RustPublicSurface::from_json_file(
+///     std::path::Path::new("target/doc/arniko.json"), "arniko 0.2.99",
+/// )?;
+/// ```
+#[cfg(feature = "producer")]
+#[derive(Debug, Clone)]
+pub struct RustPublicSurface {
+    snapshot: ApiSnapshot,
+}
+
+#[cfg(feature = "producer")]
+impl RustPublicSurface {
+    /// Parse an in-memory rustdoc JSON document, labelled `version`.
+    pub fn from_str(doc: &str, version: &str) -> Result<Self, crate::producer::ProducerError> {
+        Ok(Self {
+            snapshot: crate::producer::snapshot_from_rustdoc_str(doc, version)?,
+        })
+    }
+
+    /// Read + parse a rustdoc JSON file, labelled `version`.
+    pub fn from_json_file(
+        path: &std::path::Path,
+        version: &str,
+    ) -> Result<Self, crate::producer::ProducerError> {
+        Ok(Self {
+            snapshot: crate::producer::snapshot_from_rustdoc_json(path, version)?,
+        })
+    }
+}
+
+#[cfg(feature = "producer")]
+impl Surface for RustPublicSurface {
+    fn name(&self) -> &'static str {
+        // One rust-public surface per crate; the ledger keys on this fixed name.
+        "rust-public"
+    }
+
+    fn snapshot(&self) -> ApiSnapshot {
+        self.snapshot.clone()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
