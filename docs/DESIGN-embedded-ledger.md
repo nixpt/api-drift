@@ -252,6 +252,36 @@ cleanest self-contained demo of the ledger: `ledger!` over `StoreError` +
 becomes one ledger entry + `add-match-arm ×7` (one per adapter) instead of
 seven simultaneous compile errors discovered one `cargo check` at a time.
 
+### The other way around — checkstand's product catalog is a *data* surface
+
+checkstand doesn't only change its code; its **product catalog is periodic
+data** (`Product { id, name, price_cents, stock }` seeded via `Store::new
+(products)`). And today that catalog is re-implemented in **seven `main.rs`
+files** — each standalone adapter binary seeds its own `Vec<Product>`
+(usually a single Widget/Gadget), the `checkstand-server` binary seeds its
+own three, and none is the catalog-of-record. The same "silently drifting,
+re-typed in N places" disease api-drift exists to fix, here on *data* instead
+of *code*.
+
+Because the design made `Surface` open ("the core does not care which
+contract"), a **catalog surface** feeds product rows through the exact same
+snapshot → diff → classify → suggest path:
+
+- `Item.path = products::<name>` (stable product key), `Item.sig = canonical
+  row` (`name`, `price_cents`, low-stock threshold).
+- New product → `Added` (Compatible); re-price → `SignatureChanged`
+  (Warning — a stale price is semantic drift, not a build break); delisted →
+  `Removed` (Breaking for any pending delivery/quote referencing it).
+- `attrs = ["deprecated"]` reuses APIDRIFT-5's machinery for "delist-soon"
+  (stock deprecated, still orderable for a window).
+
+This needs one small core addition — an `ItemKind` for a non-code row
+(`Row`/`Data`) — and a `catalog` surface helper; filed as APIDRIFT-14. The
+ledger then records catalog evolution with migration notes ("delisted
+Widget → map to Widget-2 in the dashboard"), and the merge gate flags
+"re-priced X, 3 adapters quote it" the same way it flags API breaks.
+
+
 
 ## Non-goals
 

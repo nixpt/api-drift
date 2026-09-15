@@ -79,6 +79,17 @@ record, and record checkstand-core as a third ledger breadboard.
 ### 🔗 References
 - `projects/checkstand` (`AGENTS.md`, `crates/checkstand-core`, `crates/checkstand-mcp`)
 
+### 📝 Follow-up (same day): checkstand the other way around
+
+checkstand's product catalog is periodic **data** (`Product { id, name,
+price_cents, stock }`), re-typed independently in seven `main.rs` files with
+no catalog-of-record. Because `Surface` is open, a `catalog` surface feeds
+product rows through the same snapshot→diff→classify→suggest path — new SKU =
+Added, re-price = SignatureChanged (Warning), delist = Removed (Breaking),
+`attrs=["deprecated"]` for delist-soon. Filed APIDRIFT-14 (needs `ItemKind::
+Row` + `CatalogSurface`).
+
+
 ## [2026-09-14] - APIDRIFT-12 Evorium borrow survey 📋
 
 ### 📝 Summary
