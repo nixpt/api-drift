@@ -1,4 +1,5 @@
-//! Embedded contract ledger: `ledger!` test + `ledger.jsonl` history.
+//! Embedded contract ledger: `ledger!` test + `ledger.jsonl` history (upstream)
+//! and `check!` test + `api-drift.toml` pins (consumer side, APIDRIFT-9).
 //!
 //! Design: `api-drift/docs/DESIGN-embedded-ledger.md`. An upstream repo adds
 //! this crate as a dev-dependency and embeds the ledger as one test:
@@ -30,6 +31,13 @@
 //!
 //! The workflow mirrors evorium's canopy cycle: diff (plan) → verify →
 //! append (commit). Corrections append, never rewrite (append-only JSONL).
+
+#[cfg(feature = "consumer")]
+pub mod config;
+#[cfg(feature = "consumer")]
+pub mod consumer;
+#[cfg(feature = "consumer")]
+pub mod usage;
 
 pub use api_drift::surface::{EnumSurface, Surface};
 pub use api_drift::{ApiSnapshot, ClassifiedBreak, SnapshotFileError};
@@ -359,6 +367,40 @@ macro_rules! ledger {
                     std::env::var("API_DRIFT_UPDATE").is_ok_and(|v| v == "1"),
                 );
             )*
+        }
+    };
+}
+
+/// Consumer-side check macro (APIDRIFT-9, requires `consumer` feature).
+///
+/// Reads `api-drift.toml` at `CARGO_MANIFEST_DIR`, follows upstream ledger
+/// entries from each `pin` to the current head, scans `src/` with `syn` for
+/// enum patterns and path expressions that match the broken items, and panics
+/// with a call-site-scoped report when any break hits a real usage.
+///
+/// Passes silently when the consumer is pinned to the current head (no new
+/// ledger entries since the pin).
+///
+/// ```toml
+/// # <consumer>/api-drift.toml
+/// [[upstream]]
+/// name    = "bro-tui"
+/// surface = "backend-events"
+/// source  = { path = "../bro-tui/api-drift" }
+/// pin     = "sha256:a17f936ec57888da6403eda6fd0a2bb04871a217197e3c780cb9041572b14199"
+/// ```
+///
+/// ```ignore
+/// // <consumer>/tests/api_drift_consumer.rs
+/// api_drift_ledger::check!();
+/// ```
+#[cfg(feature = "consumer")]
+#[macro_export]
+macro_rules! check {
+    () => {
+        #[test]
+        fn api_drift_consumer_check() {
+            $crate::consumer::run(env!("CARGO_MANIFEST_DIR"));
         }
     };
 }

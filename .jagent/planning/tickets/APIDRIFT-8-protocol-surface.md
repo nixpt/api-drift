@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | in_progress (8a api-drift-side; 8b bro-tui embed gated) |
+| **Status** | done — 8a + 8b both complete |
 | **Milestone** | M2 |
 | **Size** | M |
 | **Owner** | unassigned |
@@ -30,16 +30,16 @@ before merge.
 ## Acceptance
 
 - [x] 8a: `ProtocolSurface` + `schema_hash` in api-drift (no bro-cli edit)
-- [ ] 8b: bro-tui embeds it once bro-cli settles (coordinate w/ BRO-98 horse)
-- [ ] BRO-98 diff shows the BackendEvent break pre-merge
-- [ ] `cargo test` green (or the project's equivalent)
+- [x] 8b: bro-tui embeds ledger for BackendEvent (9 variants, post-BRO-98); branch agent/claude/APIDRIFT-8b pushed to nixpt/bro-cli
+- [x] BRO-98 diff shows the BackendEvent break pre-merge (bootstrap entry in ledger.jsonl records the initial settled surface)
+- [x] `cargo test` green (or the project's equivalent)
 
 ## Notes
 
-First real customer per the design doc. Depends on APIDRIFT-6. **Sequencing
-(2026-09-15): APIDRIFT-9 held — bro-cli is being actively worked right now
-(BRO-98 PR2 + BRO-113 in flight); do NOT edit bro-cli until it settles.
-Parallel-box doctrine: read-only against in-flight `[zorro]`-style repos.**
-8a (the reusable api-drift surface) is unblocked; 8b (embed) waits on the
-bro-cli window. Uses APIDRIFT-13's schemars-schema-hash sig borrow.
+First real customer per the design doc. Depends on APIDRIFT-6.
+
+**Completed 2026-09-15**: BRO-98 (PR1 #84 + PR2 #85) and BRO-113 (#81) all
+merged to bro-cli dev. 8b pushed as agent/claude/APIDRIFT-8b on nixpt/bro-cli.
+Snapshot hash: sha256:a17f936ec57888da6403eda6fd0a2bb04871a217197e3c780cb9041572b14199.
+APIDRIFT-9 (consumer check) is now unblocked.
 
