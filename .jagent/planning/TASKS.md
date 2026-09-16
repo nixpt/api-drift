@@ -21,6 +21,12 @@
 | [APIDRIFT-12](./tickets/APIDRIFT-12-evorium-borrows.md) | Evorium borrows: guard done in core; relatedness+similarity remain | relatedness → 11 |
 | [APIDRIFT-13](./tickets/APIDRIFT-13-checkstand-breadboard.md) | checkstand borrows + breadboard | schemars sig done in 8a; breadboard later |
 | [APIDRIFT-3](./tickets/APIDRIFT-3-applier.md) | call-site applier / codemod | after 5, 9 |
+| [APIDRIFT-15](./tickets/APIDRIFT-15-xray-nexus-inspect-json.md) | x-ray → nexus `inspect --json` consumer pair (M2 unblock, not in flux) | first; see docs/CONSUMERS.md |
+| [APIDRIFT-16](./tickets/APIDRIFT-16-exosphere-capability-shell-surfaces.md) | exosphere CapabilityType/ShellRequest/CapsuleManifest surfaces; nexus `Request` mirror | after EXO-214/215 land |
+| [APIDRIFT-17](./tickets/APIDRIFT-17-nakshatra-boot-toml-nak-env.md) | nakshatra boot.toml keys + NAK_* env (C producer); nexus recipe drift incident | motivating story |
+| [APIDRIFT-18](./tickets/APIDRIFT-18-nexus-sdk-wire-gui-consumer.md) | nexus WireKey/IPC/keys/guests.d; nexus-gui consumer (bro-tui↔bro-desktop shape) | after NEXUS-056..059 merge |
+| [APIDRIFT-19](./tickets/APIDRIFT-19-hawk-policy-rule-event-surfaces.md) | hawk PolicyRule + SecurityEvent; YAML usage scan | cheap non-Rust consumer |
+| [APIDRIFT-20](./tickets/APIDRIFT-20-wsforge-profile-shell-surface.md) | wsforge profile keys vs script reads; shell usage scan | M3 |
 
 ## Done
 
