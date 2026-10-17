@@ -27,6 +27,7 @@
 | [APIDRIFT-18](./tickets/APIDRIFT-18-nexus-sdk-wire-gui-consumer.md) | nexus WireKey/IPC/keys/guests.d; nexus-gui consumer (bro-tui↔bro-desktop shape) | after NEXUS-056..059 merge |
 | [APIDRIFT-19](./tickets/APIDRIFT-19-hawk-policy-rule-event-surfaces.md) | hawk PolicyRule + SecurityEvent; YAML usage scan | cheap non-Rust consumer |
 | [APIDRIFT-20](./tickets/APIDRIFT-20-wsforge-profile-shell-surface.md) | wsforge profile keys vs script reads; shell usage scan | M3 |
+| [APIDRIFT-21](./tickets/APIDRIFT-21-syn-producer.md) | proposal: stable-toolchain `syn` producer (antarikshya's `anta-drift` as the upstream candidate) | filed from ANTA-22; rustdoc producer is nightly-only |
 
 ## Done
 
