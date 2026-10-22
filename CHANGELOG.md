@@ -7,6 +7,27 @@ All notable changes to api-drift are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `producer` (APIDRIFT-21): **re-export materialization** — public `use` items
+  now surface at their reachable local path. Named item re-exports emit one
+  alias, module aliases expand their public contents (with a duplicate-segment
+  collapse for `pub use zorro_io as io` over a crate that also has an `io`
+  module), globs expand into the parent module (including globs of private
+  local modules via the index tree), and local `use` chains are resolved.
+  Aliases carry `snapshot::RE_EXPORT_ATTR` and a stable signature.
+- `producer`: **signature normalization** — rustdoc ids in `resolved_path`,
+  `impls`/`implementations`/`items`/`fields`/`variants`/`links` lists, and
+  generic params no longer leak into signatures. Type paths prefer the shortest
+  local re-export spelling when one exists.
+
+### Fixed
+
+- `classify`: a signature change on a re-export-backed (`re_export`) item is a
+  `Warning`, not `Breaking` — the defining crate owns that shape.
+- `api-drift-ledger`: `API_DRIFT_UPDATE=1` now rewrites an **existing**
+  snapshot and reports `Updated`; previously it only handled the first record.
+
 ## [0.1.0] - 2026-09-14
 
 First release: the I/O-free core plus an opt-in rustdoc-JSON producer and an
