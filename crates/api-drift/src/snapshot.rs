@@ -5,6 +5,11 @@
 //! deliberately coarse: path + kind + signature string. Deep semantic
 //! comparison lives in `classify`, not here.
 
+/// Attribute marker producers set on items surfaced through a `pub use`.
+/// `classify` treats a signature change on such a path as owned by the
+/// defining crate (Warning, not Breaking).
+pub const RE_EXPORT_ATTR: &str = "re_export";
+
 /// What kind of public item this is. Used by `classify` to tell a
 /// struct-field removal apart from a function-signature change.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
