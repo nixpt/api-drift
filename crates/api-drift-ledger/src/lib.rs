@@ -265,9 +265,14 @@ pub fn check(dir: &Path, surface: &dyn Surface, update: bool) -> Result<CheckOut
         return Ok(CheckOutcome::Recorded);
     }
     let old_snap = ApiSnapshot::new(&committed.version, committed.items);
-    Ok(CheckOutcome::Unrecorded {
-        breaks: classify_diff(&diff_snapshots(&old_snap, &new_snap)),
-    })
+    let breaks = classify_diff(&diff_snapshots(&old_snap, &new_snap));
+    if update {
+        // `API_DRIFT_UPDATE=1` must work for an existing snapshot too, not
+        // only for the first record (APIDRIFT-21).
+        record(dir, surface, "", "unknown", "")?;
+        return Ok(CheckOutcome::Updated { breaks });
+    }
+    Ok(CheckOutcome::Unrecorded { breaks })
 }
 
 /// The `ledger!` test body: check every surface, panic with the exact
@@ -411,6 +416,19 @@ mod tests {
             }
             other => panic!("expected Unrecorded, got {other:?}"),
         }
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn update_rewrites_existing_snapshot() {
+        let d = temp_dir("update-existing");
+        let a = surf("e", &[("A", "")]);
+        check(&d, &a, true).unwrap();
+        let b = surf("e", &[("A", ""), ("B", "")]);
+        let out = check(&d, &b, true).unwrap();
+        assert!(matches!(out, CheckOutcome::Updated { .. }));
+        // After the update the same surface is clean without the env flag.
+        assert!(matches!(check(&d, &b, false).unwrap(), CheckOutcome::Clean));
         let _ = std::fs::remove_dir_all(&d);
     }
 

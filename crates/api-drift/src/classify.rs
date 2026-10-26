@@ -5,7 +5,7 @@
 //! mechanical [`suggest`](crate::suggest) layer and the human triage order.
 
 use crate::diff::{ApiDiff, Changed};
-use crate::snapshot::{Item, ItemKind};
+use crate::snapshot::{Item, ItemKind, RE_EXPORT_ATTR};
 
 /// How bad is this for a downstream consumer?
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -127,19 +127,30 @@ fn classify_removed(item: &Item) -> ClassifiedBreak {
 }
 
 fn classify_changed(c: &Changed) -> ClassifiedBreak {
+    let re_export = c
+        .new_attrs
+        .iter()
+        .any(|a| a == RE_EXPORT_ATTR)
+        || c.old_attrs.iter().any(|a| a == RE_EXPORT_ATTR);
     let (kind, severity) = if c.old_kind == c.new_kind {
         // Rust has no default args: any fn/method signature move is Breaking
         // unless it matches the widening allowlist (purely more permissive
         // input, e.g. `&str` -> `impl Into<String>`).
-        let sev = match c.old_kind {
-            ItemKind::Function | ItemKind::Method => {
-                if is_widening(&c.old_sig, &c.new_sig) {
-                    Severity::Compatible
-                } else {
-                    Severity::Breaking
+        let sev = if re_export {
+            // The path is a `pub use`: the defining crate owns the shape and
+            // tracks it in its own ledger. Report as Warning, not a break.
+            Severity::Warning
+        } else {
+            match c.old_kind {
+                ItemKind::Function | ItemKind::Method => {
+                    if is_widening(&c.old_sig, &c.new_sig) {
+                        Severity::Compatible
+                    } else {
+                        Severity::Breaking
+                    }
                 }
+                _ => Severity::Warning,
             }
-            _ => Severity::Warning,
         };
         (BreakKind::SignatureChanged, sev)
     } else {
@@ -152,7 +163,11 @@ fn classify_changed(c: &Changed) -> ClassifiedBreak {
         severity,
         old_sig: Some(c.old_sig.clone()),
         new_sig: Some(c.new_sig.clone()),
-        note: format!("changed {}: `{}` -> `{}`", c.path, c.old_sig, c.new_sig),
+        note: if re_export {
+            format!("re-export-backed change {} (shape owned by the defining crate)", c.path)
+        } else {
+            format!("changed {}: `{}` -> `{}`", c.path, c.old_sig, c.new_sig)
+        },
     }
 }
 
@@ -239,10 +254,33 @@ mod tests {
                 new_kind: ItemKind::Enum,
                 old_sig: "pub struct T".to_owned(),
                 new_sig: "pub enum T".to_owned(),
+                old_attrs: vec![],
+                new_attrs: vec![],
             }],
         });
         assert_eq!(kind[0].kind, BreakKind::KindChanged);
         assert_eq!(kind[0].severity, Severity::Breaking);
+    }
+
+    #[test]
+    fn re_export_signature_change_is_warning() {
+        let d = ApiDiff {
+            added: vec![],
+            removed: vec![],
+            changed: vec![Changed {
+                path: "a::Thing".to_owned(),
+                old_kind: ItemKind::Struct,
+                new_kind: ItemKind::Struct,
+                old_sig: "{\"fields\":[]}".to_owned(),
+                new_sig: "re-export of ext::Thing".to_owned(),
+                old_attrs: vec![],
+                new_attrs: vec![RE_EXPORT_ATTR.to_owned()],
+            }],
+        };
+        let out = classify_diff(&d);
+        assert_eq!(out[0].kind, BreakKind::SignatureChanged);
+        assert_eq!(out[0].severity, Severity::Warning);
+        assert!(out[0].note.contains("re-export-backed"));
     }
 
     #[test]

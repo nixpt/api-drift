@@ -21,6 +21,10 @@ pub struct Changed {
     pub old_sig: String,
     /// Rendered signature before / after.
     pub new_sig: String,
+    /// Attribute markers before / after (e.g. `re_export`).
+    pub old_attrs: Vec<String>,
+    /// Attribute markers before / after (e.g. `re_export`).
+    pub new_attrs: Vec<String>,
 }
 
 /// The raw old-vs-new comparison.
@@ -96,6 +100,8 @@ fn emit_removed_changed(
                         new_kind: n.kind,
                         old_sig: item.sig.clone(),
                         new_sig: n.sig.clone(),
+                        old_attrs: item.attrs.clone(),
+                        new_attrs: n.attrs.clone(),
                     });
                 }
             }

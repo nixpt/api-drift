@@ -66,3 +66,12 @@ Artifacts: docs/BRANDING.md, assets/branding/api-drift-banner.svg, assets/brandi
 
 Author type: agent
 
+
+## 2026-10-22T06:25:02-05:00 — [VERIFIED] [ARCHITECTURAL] APIDRIFT-21: producer materializes re-exports and normalizes ids
+
+Reason:
+The ZORRA-1 ledger was dominated by pub-use invisibility (157 Removed) and rustdoc-id churn in signatures.
+
+Outcome:
+producer materializes named/module/glob/private-module use chains; signatures are id-stable and alias-aware; classify downgrades re-export-backed changes to Warning; API_DRIFT_UPDATE rewrites existing snapshots. Validated on zorro (surface 61->202, consumer compile green). Remaining limit: rustdoc paths is a reference table, so dependency-flattened contents may be absent.
+
