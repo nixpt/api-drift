@@ -127,10 +127,7 @@ fn classify_removed(item: &Item) -> ClassifiedBreak {
 }
 
 fn classify_changed(c: &Changed) -> ClassifiedBreak {
-    let re_export = c
-        .new_attrs
-        .iter()
-        .any(|a| a == RE_EXPORT_ATTR)
+    let re_export = c.new_attrs.iter().any(|a| a == RE_EXPORT_ATTR)
         || c.old_attrs.iter().any(|a| a == RE_EXPORT_ATTR);
     let (kind, severity) = if c.old_kind == c.new_kind {
         // Rust has no default args: any fn/method signature move is Breaking
@@ -164,7 +161,10 @@ fn classify_changed(c: &Changed) -> ClassifiedBreak {
         old_sig: Some(c.old_sig.clone()),
         new_sig: Some(c.new_sig.clone()),
         note: if re_export {
-            format!("re-export-backed change {} (shape owned by the defining crate)", c.path)
+            format!(
+                "re-export-backed change {} (shape owned by the defining crate)",
+                c.path
+            )
         } else {
             format!("changed {}: `{}` -> `{}`", c.path, c.old_sig, c.new_sig)
         },

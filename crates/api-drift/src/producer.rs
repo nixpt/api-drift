@@ -119,7 +119,11 @@ struct Doc<'a> {
 }
 
 impl<'a> Doc<'a> {
-    fn new(index: &'a Map<String, Value>, paths: &'a Map<String, Value>, root_id: Option<&str>) -> Self {
+    fn new(
+        index: &'a Map<String, Value>,
+        paths: &'a Map<String, Value>,
+        root_id: Option<&str>,
+    ) -> Self {
         let mut info = HashMap::new();
         for (id, p) in paths {
             let dotted = p
@@ -144,7 +148,10 @@ impl<'a> Doc<'a> {
                         .and_then(Value::as_str)
                         .unwrap_or("other")
                         .to_owned(),
-                    crate_id: p.get("crate_id").and_then(Value::as_u64).unwrap_or(u64::MAX),
+                    crate_id: p
+                        .get("crate_id")
+                        .and_then(Value::as_u64)
+                        .unwrap_or(u64::MAX),
                 },
             );
         }
@@ -197,7 +204,13 @@ impl<'a> Doc<'a> {
             module_path.insert(id.clone(), root.clone());
         }
 
-        Self { index, root, info, parent, module_path }
+        Self {
+            index,
+            root,
+            info,
+            parent,
+            module_path,
+        }
     }
 
     fn node(&self, id: &str) -> Option<&'a Value> {
@@ -346,7 +359,9 @@ impl<'a> Doc<'a> {
                     } else if k == "id" && val.is_u64() {
                         out.insert(
                             k.clone(),
-                            Value::String(self.id_label(&val.as_u64().unwrap_or(0).to_string(), alias_of)),
+                            Value::String(
+                                self.id_label(&val.as_u64().unwrap_or(0).to_string(), alias_of),
+                            ),
                         );
                     } else if matches!(
                         k.as_str(),
@@ -378,7 +393,9 @@ impl<'a> Doc<'a> {
                 }
                 Value::Object(out)
             }
-            Value::Array(a) => Value::Array(a.iter().map(|e| self.normalize(e, alias_of)).collect()),
+            Value::Array(a) => {
+                Value::Array(a.iter().map(|e| self.normalize(e, alias_of)).collect())
+            }
             other => other.clone(),
         }
     }
@@ -388,7 +405,13 @@ impl<'a> Doc<'a> {
     }
 
     /// Emit `target` at the exact alias path (named re-export).
-    fn emit_target(&self, target: &str, alias: &str, out: &mut BTreeMap<String, RawItem>, depth: usize) {
+    fn emit_target(
+        &self,
+        target: &str,
+        alias: &str,
+        out: &mut BTreeMap<String, RawItem>,
+        depth: usize,
+    ) {
         if depth > 16 {
             return;
         }
@@ -494,7 +517,9 @@ impl<'a> Doc<'a> {
         };
         for child in children.iter().filter_map(Value::as_u64) {
             let cid = child.to_string();
-            let Some(node) = self.node(&cid) else { continue };
+            let Some(node) = self.node(&cid) else {
+                continue;
+            };
             if let Some(parts) = self.use_parts(&cid) {
                 // Private `use` bindings are not re-exported by a glob.
                 if !Self::is_public(node) {
@@ -513,7 +538,9 @@ impl<'a> Doc<'a> {
             let Some(inner) = node.get("inner").and_then(Value::as_object) else {
                 continue;
             };
-            let Some(kind_key) = inner.keys().next() else { continue };
+            let Some(kind_key) = inner.keys().next() else {
+                continue;
+            };
             let Some(name) = node.get("name").and_then(Value::as_str) else {
                 continue;
             };
@@ -542,10 +569,18 @@ impl<'a> Doc<'a> {
         if out.contains_key(alias) {
             return;
         }
-        let Some(node) = self.node(target_id) else { return };
-        let Some(inner) = node.get("inner").and_then(Value::as_object) else { return };
-        let Some((kind_key, payload)) = inner.iter().next() else { return };
-        let Some(kind) = Self::kind_from_key(kind_key) else { return };
+        let Some(node) = self.node(target_id) else {
+            return;
+        };
+        let Some(inner) = node.get("inner").and_then(Value::as_object) else {
+            return;
+        };
+        let Some((kind_key, payload)) = inner.iter().next() else {
+            return;
+        };
+        let Some(kind) = Self::kind_from_key(kind_key) else {
+            return;
+        };
         let mut attrs = collect_attrs(node);
         if !attrs.iter().any(|a| a == RE_EXPORT_ATTR) {
             attrs.push(RE_EXPORT_ATTR.to_owned());
@@ -572,7 +607,9 @@ impl<'a> Doc<'a> {
         if out.contains_key(alias) {
             return;
         }
-        let Some(info) = self.info.get(target_id) else { return };
+        let Some(info) = self.info.get(target_id) else {
+            return;
+        };
         let Some(kind) = Self::kind_from_path(&info.kind) else {
             return;
         };
@@ -624,6 +661,10 @@ struct UseParts<'a> {
     is_glob: bool,
 }
 
+// stable rustfmt (which CI checks) lays this function out at 103 lines, over
+// clippy::pedantic's 100-line limit; splitting it would only scatter the rustdoc-JSON
+// shape checks that read best in one place.
+#[allow(clippy::too_many_lines)]
 fn parse_doc(root: &Value, version: &str) -> Result<ApiSnapshot, ProducerError> {
     let index = root
         .get("index")
@@ -634,7 +675,10 @@ fn parse_doc(root: &Value, version: &str) -> Result<ApiSnapshot, ProducerError> 
         .and_then(Value::as_object)
         .ok_or_else(|| ProducerError::BadShape("missing `paths` object".to_owned()))?;
 
-    let root_id = root.get("root").and_then(Value::as_u64).map(|n| n.to_string());
+    let root_id = root
+        .get("root")
+        .and_then(Value::as_u64)
+        .map(|n| n.to_string());
     let doc = Doc::new(index, paths, root_id.as_deref());
     // Path → item; last direct item wins, aliases never overwrite direct items.
     let mut by_path: BTreeMap<String, RawItem> = BTreeMap::new();
@@ -643,7 +687,9 @@ fn parse_doc(root: &Value, version: &str) -> Result<ApiSnapshot, ProducerError> 
         if !Doc::is_public(node) {
             continue;
         }
-        let Some(info) = doc.info.get(id) else { continue };
+        let Some(info) = doc.info.get(id) else {
+            continue;
+        };
         if info.crate_id != 0 {
             continue;
         }
@@ -678,8 +724,12 @@ fn parse_doc(root: &Value, version: &str) -> Result<ApiSnapshot, ProducerError> 
         if !Doc::is_public(node) {
             continue;
         }
-        let Some(parts) = doc.use_parts(id) else { continue };
-        let Some(parent) = doc.parent.get(id) else { continue };
+        let Some(parts) = doc.use_parts(id) else {
+            continue;
+        };
+        let Some(parent) = doc.parent.get(id) else {
+            continue;
+        };
         if !doc.module_path.contains_key(parent) {
             continue;
         }
@@ -700,7 +750,9 @@ fn parse_doc(root: &Value, version: &str) -> Result<ApiSnapshot, ProducerError> 
     // rather than the defining crate's (`zorro_nn::backend::ComputeBackend`).
     let mut alias_of: HashMap<String, String> = HashMap::new();
     for raw in by_path.values() {
-        let Some(target) = &raw.target_path else { continue };
+        let Some(target) = &raw.target_path else {
+            continue;
+        };
         match alias_of.get(target) {
             Some(current) if current.len() <= raw.path.len() => {}
             _ => {

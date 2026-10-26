@@ -9,3 +9,8 @@ br = "build --release"
 
 # [build]
 # rustc-wrapper = "sccache"   # enable if sccache is installed (env RUSTC_WRAPPER also works)
+
+# Keep `cargo update` inside the crate rust-version (the msrv CI job checks it): an
+# unconstrained update pulled clap 4.6 / clap_lex 1.1 (edition 2024, rust 1.85) into the lock.
+[resolver]
+incompatible-rust-versions = "fallback"
