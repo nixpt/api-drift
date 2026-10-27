@@ -23,6 +23,11 @@
 //!   normalized payload for in-crate targets, or `re-export of <path>` for
 //!   external ones (the leaf crate owns that shape and its own ledger).
 //!
+//! - **Inherent members** (`APIDRIFT-22`): public methods and associated
+//!   consts of in-crate structs/enums, read from the type's `impls` list. Key
+//!   scheme, signature shape, alias and `doc(hidden)` rules are in
+//!   `producer_members.rs`.
+//!
 //! # Signature stability
 //!
 //! Signature strings are the compact `inner` JSON payload with rustdoc item
@@ -35,7 +40,8 @@
 //! # Limitations (documented, not silent)
 //!
 //! - Methods surface as `ItemKind::Function` (rustdoc lists them as
-//!   `function` nodes; no Method split yet).
+//!   `function` nodes; no Method split yet). Only what the invoking
+//!   `cargo rustdoc` saw is tracked: `cfg`-gated items need their feature on.
 //! - `sig` is compact JSON, not `pub fn …` rendering — machine-diffable,
 //!   human-ugly.
 //! - Unknown `inner` shapes are skipped, never error (newer rustdoc degrades
@@ -47,6 +53,9 @@
 use crate::snapshot::{ApiSnapshot, Item, ItemKind, RE_EXPORT_ATTR};
 use std::collections::{BTreeMap, HashMap};
 use std::fmt;
+
+#[path = "producer_members.rs"]
+mod members;
 
 #[cfg(feature = "producer")]
 use serde_json::{Map, Value};
@@ -744,6 +753,10 @@ fn parse_doc(root: &Value, version: &str) -> Result<ApiSnapshot, ProducerError> 
             doc.emit_target(&target, &alias, &mut by_path, 0);
         }
     }
+
+    // Inherent methods / associated consts (APIDRIFT-22): `paths` lists only
+    // the linked-to ones, so walk each type's `impls`.
+    doc.add_inherent_members(&mut by_path);
 
     // Prefer the shortest local alias for each canonical target: signature
     // paths then use the public spelling (`zorro::backend::ComputeBackend`)

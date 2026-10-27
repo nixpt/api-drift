@@ -9,6 +9,15 @@ All notable changes to api-drift are recorded here. The format follows
 
 ### Added
 
+- `producer` (APIDRIFT-22): **inherent methods and associated consts** are now
+  tracked. rustdoc lists an inherent method in `paths` only when something links
+  to it, so a `paths`-only walk saw a fraction of a type's methods; the producer
+  now walks each struct/enum's `impls`. Keys are `Type::member` (disambiguated
+  as `Type::member@SelfType` when several inherent impls define the name),
+  signatures include the impl's generics and self type, `#[doc(hidden)]` members
+  are skipped (hiding a method reads as a removal), and local aliases of a type
+  carry pointer entries. Existing entries keep their spelling, so snapshots
+  grow by additions only. See `.jagent/planning/tickets/APIDRIFT-22-inherent-methods.md`.
 - `producer` (APIDRIFT-21): **re-export materialization** — public `use` items
   now surface at their reachable local path. Named item re-exports emit one
   alias, module aliases expand their public contents (with a duplicate-segment
