@@ -1,0 +1,71 @@
+@caison { version: "1.0" }
+# api-drift milestones. Written by kuina (borderland lane) on 2026-11-18 from ROADMAP.md, STATE.md,
+# ticket files, tag v0.1.0 and merged PRs (#1..#12). ROADMAP.md keeps the prose; this file keeps the sequence.
+
+schema: "milestones/1"
+
+project: {
+  name: "api-drift"
+  kind: "repo"
+  lifecycle: "active" @verified { at: "2026-11-18", by: "kuina" }
+  lifecycle_since: "2026-09-14"
+  home: "zorro"
+  ticket_prefix: "APIDRIFT"
+  root: "4d9841f5f2d4295f35c9efd4eddef01c1ccc22ea"
+  summary: "M0 (core pipeline) and M1 (producer + hardening) done, v0.1.0 tagged; M2 embedded ledger in progress: surfaces and ledger crate landed, the bro-cli consumer half is blocked"
+  north_star: "Upstream API moves once; every downstream fixes itself (or gets told exactly how)"
+  stewards: ["arisu", "kuina"]
+  evidence: {
+    default_branch: "main"
+  }
+}
+
+milestones: [
+  {
+    id: "M0"
+    title: "Core pipeline (snapshot / diff / classify / suggest)"
+    status: "done" @verified { at: "2026-11-18", by: "kuina" }
+    version: "0.1.0"
+    tickets: ["APIDRIFT-1"]
+    done_when: [
+      { claim: "APIDRIFT-1 done", check: { kind: "tickets", status: "done" } },
+      { claim: "v0.1.0 tagged", check: { kind: "tag", pattern: "v0.1.0" } },
+    ]
+  },
+  {
+    id: "M1"
+    title: "Producer + hardening (rustdoc-JSON producer, core correctness)"
+    status: "done" @verified { at: "2026-11-18", by: "kuina" }
+    tickets: ["APIDRIFT-2", "APIDRIFT-4"]
+    depends_on: ["M0"]
+    done_when: [
+      { claim: "producer and core-correctness tickets done", check: { kind: "tickets", status: "done" } },
+    ]
+  },
+  {
+    id: "M2"
+    title: "Embedded ledger (surfaces, ledger crate, CLI, consumer check, gate)"
+    status: "active" @verified { at: "2026-11-18", by: "kuina" }
+    started_at: "2026-09-14"
+    tickets: ["APIDRIFT-5", "APIDRIFT-6", "APIDRIFT-7", "APIDRIFT-8", "APIDRIFT-9", "APIDRIFT-10", "APIDRIFT-11", "APIDRIFT-12", "APIDRIFT-14", "APIDRIFT-21", "APIDRIFT-22"]
+    depends_on: ["M1"]
+    done_when: [
+      { claim: "action enum, Surface + ledger crate, rust-public and catalog surfaces done", check: { kind: "tickets", ids: ["APIDRIFT-5", "APIDRIFT-6", "APIDRIFT-7", "APIDRIFT-14", "APIDRIFT-21"], status: "done" } },
+      { claim: "re-export materialization merged (PR #10)", check: { kind: "merged", pr: "10" } },
+      "bro-acp pair (APIDRIFT-8b bro-tui embed + APIDRIFT-9 bro-desktop consumer) proves the ledger pre-merge",
+      "CLI affected/release-hint and the registry gate (APIDRIFT-10 remainder, APIDRIFT-11) land",
+    ]
+    notes: "APIDRIFT-9 is blocked on bro-cli churn. Doc drift: APIDRIFT-22 ticket still says In review but its PR #12 merged 2026-10-27; ROADMAP.md M2 boxes for APIDRIFT-6, -7 and -10 are unticked though STATE.md says shipped."
+  },
+  {
+    id: "M3"
+    title: "Fleet consumers (xray/nexus, exosphere, nakshatra, nexus-sdk, hawk, wsforge surfaces)"
+    status: "planned" ~0.5 @verified { at: "2026-11-18", by: "kuina" }
+    tickets: ["APIDRIFT-15", "APIDRIFT-16", "APIDRIFT-17", "APIDRIFT-18", "APIDRIFT-19", "APIDRIFT-20"]
+    depends_on: ["M2"]
+    done_when: [
+      { claim: "consumer surface tickets done", check: { kind: "tickets", status: "done" } },
+    ]
+    notes: "Not in ROADMAP.md: groups the six backlog consumer tickets filed in PR #8 (docs/CONSUMERS.md)."
+  },
+]
